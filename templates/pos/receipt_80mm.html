@@ -1,0 +1,212 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="{{ lang|default:'en' }}" dir="{% if lang == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% if lang == "ar" %}إيصال {{ order_no }}{% else %}Receipt {{ order_no }}{% endif %}</title>
+  <style>
+    body{ margin:0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .paper{ width:80mm; padding:10px 10px 14px; margin:0 auto; }
+    .copy{ page-break-after: always; }
+    .copy:last-child{ page-break-after: auto; }
+    .center{ text-align:center; }
+    .muted{ color:#555; font-size:12px; }
+    .big{ font-weight:900; font-size:18px; letter-spacing:.5px; }
+    .logo{ width:40px; height:40px; object-fit:contain; margin:0 auto 4px; display:block; }
+    .line{ border-top:1px dashed #000; margin:10px 0; }
+    table{ width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed; }
+    th, td{ padding:4px 2px; vertical-align:top; }
+    th{ text-align:left; font-weight:900; }
+    .r{ text-align:right; }
+    .totals td{ padding:3px 0; }
+    .grand{ font-weight:900; font-size:15px; }
+    .qr img{ width:130px; height:130px; }
+    .small{ font-size:11px; }
+    html[dir="rtl"] th,
+    html[dir="rtl"] td{ text-align:right; }
+    html[dir="rtl"] .r{ text-align:left; }
+    @media print { .no-print{ display:none; } }
+    .btn-back-pos{ display:inline-block; padding:4px 10px; border:1px solid #777; border-radius:4px; text-decoration:none; color:#111; background:#fff; font-size:12px; }
+  </style>
+</head>
+<body>
+  {% for _ in copies_range %}
+  <div class="paper copy">
+    <div class="center">
+      <img class="logo" src="{% if receipt_logo_url %}{{ receipt_logo_url }}{% else %}{% static 'assets/laundrex-logo-no-tagline.png' %}{% endif %}" alt="Logo">
+      <div class="big">{{ active_business_name|default:"Laundrex" }}</div>
+      {% if receipt_header %}<div class="muted">{{ receipt_header }}</div>{% endif %}
+      {% if receipt_address %}<div class="muted">{{ receipt_address }}</div>{% endif %}
+      {% with branch_label=branch_name|default:branch|default:"-" %}
+        {% if branch_label and branch_label != active_business_name %}
+          <div class="muted">{{ branch_label }}</div>
+        {% endif %}
+      {% endwith %}
+      {% if receipt_phone %}<div class="muted">{{ receipt_phone }}</div>{% endif %}
+      {% if cr_number %}
+        <div class="muted">{% if lang == "ar" %}السجل التجاري: {{ cr_number }}{% else %}CR: {{ cr_number }}{% endif %}</div>
+      {% endif %}
+      {% if vat_number %}
+        <div class="muted">{% if lang == "ar" %}الرقم الضريبي: {{ vat_number }}{% else %}VAT: {{ vat_number }}{% endif %}</div>
+      {% endif %}
+      <div><b>{{ order_status_label_title }}:</b> {{ order_status_label }}</div>
+      <div><b>{{ estimated_pickup_label_title }}:</b> {{ estimated_pickup }}</div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="small">
+      {% if lang == "ar" %}
+        <div><b>رقم الطلب:</b> #{{ order_no }}</div>
+        <div><b>التاريخ:</b> {{ date }}</div>
+        <div><b>الكاشير:</b> {{ cashier }}</div>
+        <div><b>العميل:</b> {{ customer }}</div>
+        {% if phone %}<div><b>الهاتف:</b> {{ phone }}</div>{% endif %}
+      {% else %}
+        <div><b>Order:</b> #{{ order_no }}</div>
+        <div><b>Date:</b> {{ date }}</div>
+        <div><b>Cashier:</b> {{ cashier }}</div>
+        <div><b>Customer:</b> {{ customer }}</div>
+        {% if phone %}<div><b>Phone:</b> {{ phone }}</div>{% endif %}
+      {% endif %}
+    </div>
+
+    <div class="line"></div>
+    <div class="small"><b>{% if lang == "ar" %}تفاصيل الخدمات{% else %}Service Breakdown{% endif %}</b></div>
+
+    <table>
+      <colgroup>
+        <col style="width:34%">
+        <col style="width:28%">
+        <col style="width:14%">
+        <col style="width:24%">
+      </colgroup>
+      <thead>
+        <tr>
+          {% if lang == "ar" %}
+            <th>الصنف</th>
+            <th>الخدمة</th>
+            <th class="r">الكمية</th>
+            <th class="r">المبلغ</th>
+          {% else %}
+            <th>Item</th>
+            <th>Svc</th>
+            <th class="r">Qty</th>
+            <th class="r">Amt</th>
+          {% endif %}
+        </tr>
+      </thead>
+
+      <tbody>
+        {% if db_order %}
+          {% for it in receipt_items %}
+          <tr>
+            <td>{{ it.item_display|default:it.item_name }}</td>
+            <td>{{ it.service_display|default:it.service_name }}</td>
+            <td class="r">{{ it.qty }}</td>
+            <td class="r">{{ it.line_total }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          {% if lang == "ar" %}
+          <tr>
+            <td>قميص</td>
+            <td>غسيل</td>
+            <td class="r">2</td>
+            <td class="r">1.000</td>
+          </tr>
+          <tr>
+            <td>بنطال</td>
+            <td>كي</td>
+            <td class="r">1</td>
+            <td class="r">0.350</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td>Shirt</td>
+            <td>Wash</td>
+            <td class="r">2</td>
+            <td class="r">1.000</td>
+          </tr>
+          <tr>
+            <td>Pant</td>
+            <td>Iron</td>
+            <td class="r">1</td>
+            <td class="r">0.350</td>
+          </tr>
+          {% endif %}
+        {% endif %}
+      </tbody>
+    </table>
+
+    <div class="line"></div>
+
+    <table class="totals">
+      {% if db_order %}
+        <tr><td>{% if lang == "ar" %}المجموع{% else %}Subtotal{% endif %}</td><td class="r">{{ db_order.subtotal }}</td></tr>
+        <tr><td>{% if lang == "ar" %}الخصم{% else %}Discount{% endif %}</td><td class="r">{{ db_order.discount }}</td></tr>
+        {% if db_order.points_redeemed_value > 0 %}
+          <tr><td>{% if lang == "ar" %}استبدال{% else %}Redeem{% endif %}</td><td class="r">{{ db_order.points_redeemed_value }}</td></tr>
+        {% endif %}
+        <tr><td>{% if lang == "ar" %}الضريبة{% else %}Tax{% endif %}</td><td class="r">{{ db_order.tax }}</td></tr>
+        {% if db_order.delivery_fee > 0 %}
+          <tr><td>{% if lang == "ar" %}التوصيل{% else %}Delivery{% endif %}</td><td class="r">{{ db_order.delivery_fee }}</td></tr>
+        {% endif %}
+        <tr class="grand"><td>{% if lang == "ar" %}الإجمالي{% else %}Total{% endif %}</td><td class="r">{{ db_order.total }}</td></tr>
+        <tr><td>{% if lang == "ar" %}المدفوع{% else %}Paid{% endif %}</td><td class="r">{{ db_order.paid }}</td></tr>
+        <tr><td><b>{% if lang == "ar" %}المتبقي{% else %}Amount Due{% endif %}</b></td><td class="r"><b>{{ db_order.balance }}</b></td></tr>
+      {% else %}
+        {% if lang == "ar" %}
+          <tr><td>المجموع</td><td class="r">1.350</td></tr>
+          <tr><td>الخصم</td><td class="r">0.000</td></tr>
+          <tr><td>الضريبة</td><td class="r">0.000</td></tr>
+          <tr class="grand"><td>الإجمالي</td><td class="r">1.350</td></tr>
+          <tr><td>المدفوع</td><td class="r">1.350</td></tr>
+          <tr><td><b>المتبقي</b></td><td class="r"><b>0.000</b></td></tr>
+        {% else %}
+          <tr><td>Subtotal</td><td class="r">1.350</td></tr>
+          <tr><td>Discount</td><td class="r">0.000</td></tr>
+          <tr><td>Tax</td><td class="r">0.000</td></tr>
+          <tr class="grand"><td>Total</td><td class="r">1.350</td></tr>
+          <tr><td>Paid</td><td class="r">1.350</td></tr>
+          <tr><td><b>Amount Due</b></td><td class="r"><b>0.000</b></td></tr>
+        {% endif %}
+      {% endif %}
+    </table>
+
+    <div class="line"></div>
+
+    <div class="center qr">
+      {% if qr_data_uri %}
+        <img src="{{ qr_data_uri }}" alt="QR">
+        <div class="muted">{% if lang == "ar" %}امسح عند الاستلام{% else %}Scan at pickup{% endif %}</div>
+        <div class="small">{{ pickup_code }}</div>
+      {% else %}
+        <div class="muted">{% if lang == "ar" %}رمز الاستلام{% else %}Pickup Code{% endif %}</div>
+        <div class="big">{{ pickup_code }}</div>
+      {% endif %}
+    </div>
+
+    <div class="line"></div>
+
+    <div class="center muted">
+      {% if receipt_footer %}
+        {{ receipt_footer }}
+      {% else %}
+        {% if lang == "ar" %}شكرا لك! يرجى الاحتفاظ بالإيصال.{% else %}Thank you! Please keep this receipt.{% endif %}
+      {% endif %}
+      <br/>
+      <span class="small">
+        {% if lang == "ar" %}للاستلام امسح الرمز أو قدم رقم الطلب #{{ order_no }}{% else %}For pickup, scan QR or provide Order #{{ order_no }}{% endif %}
+      </span>
+    </div>
+
+    <div class="no-print center" style="margin-top:12px;">
+      <button onclick="window.print()">{% if lang == "ar" %}طباعة{% else %}Print{% endif %}</button>
+      <a class="btn-back-pos" href="/pos/">{% trans "Back to POS" %}</a>
+    </div>
+  </div>
+  {% endfor %}
+</body>
+</html>

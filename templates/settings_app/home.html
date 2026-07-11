@@ -1,0 +1,195 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Settings" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Settings" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Settings" %}</h1>
+    <p class="sub">{% trans "Master data, pricing, tax, language and system preferences." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-primary" href="{% url 'catalog:home' %}">{% trans "Open Catalog" %}</a>
+    <a class="btn btn-outline" href="/admin/" target="_blank">{% trans "Admin Panel" %}</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Services" %}</h2>
+      <span class="tag">{% trans "Wash / Iron / Dry" %}</span>
+    </div>
+    <p class="muted">{% trans "Manage available services for POS and pricing rules." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Wash" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+      <div class="row"><b>{% trans "Wash + Iron" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+      <div class="row"><b>{% trans "Iron" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+      <div class="row"><b>{% trans "Dry Clean" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'catalog:home' %}">{% trans "Edit Services" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Items & Pricing" %}</h2>
+      <span class="tag">{% trans "Catalog" %}</span>
+    </div>
+    <p class="muted">{% trans "Item list and price per service. POS can auto-fill price from catalog." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Shirt" %}</b><span class="muted">{% trans "From 0.500 OMR" %}</span></div>
+      <div class="row"><b>{% trans "Pant" %}</b><span class="muted">{% trans "From 0.600 OMR" %}</span></div>
+      <div class="row"><b>{% trans "Kandura" %}</b><span class="muted">{% trans "From 1.000 OMR" %}</span></div>
+      <div class="row"><b>{% trans "Abaya" %}</b><span class="muted">{% trans "From 1.200 OMR" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-primary" href="{% url 'catalog:home' %}">{% trans "Open Items & Prices" %}</a>
+      <a class="btn btn-outline" href="/admin/apps_catalog/itemserviceprice/" target="_blank">{% trans "Edit Prices (Admin)" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Barcode Mapping" %}</h2>
+      <span class="tag">{% trans "Scanner" %}</span>
+    </div>
+    <p class="muted">{% trans "Map barcode → item for quick entry. POS uses this to auto-select item." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>S001</b><span class="muted">{% trans "Shirt" %}</span></div>
+      <div class="row"><b>K001</b><span class="muted">{% trans "Kandura" %}</span></div>
+      <div class="row"><b>A001</b><span class="muted">{% trans "Abaya" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'catalog:home' %}">{% trans "Manage Barcodes" %}</a>
+      <a class="btn btn-outline" href="/admin/apps_catalog/barcodemap/" target="_blank">{% trans "Barcode Admin" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Tax, Discounts & Currency" %}</h2>
+      <span class="tag">{% trans "OMR" %}</span>
+    </div>
+    <p class="muted">{% trans "Set default VAT/tax rules and discount rules." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Default Tax" %}</b><span class="muted">0%</span></div>
+      <div class="row"><b>{% trans "VIP Discount" %}</b><span class="muted">{% trans "Manual / Rule later" %}</span></div>
+      <div class="row"><b>{% trans "Currency" %}</b><span class="muted">{% trans "OMR" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <button class="btn btn-outline" type="button" disabled>{% trans "Configure (Next)" %}</button>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "WhatsApp" %}</h2>
+      <span class="tag">{% trans "Business API" %}</span>
+    </div>
+    <p class="muted">{% trans "Transactional templates, opt-in, and delivery status callbacks." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Templates" %}</b><span class="muted">{% trans "EN / AR" %}</span></div>
+      <div class="row"><b>{% trans "Mode" %}</b><span class="muted">{% trans "Manual send" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'settings_app:whatsapp' %}">{% trans "Configure WhatsApp" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "System" %}</h2>
+      <span class="tag">{% trans "Security" %}</span>
+    </div>
+    <p class="muted">{% trans "Backups, users, permissions, receipt header/footer, printer settings." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Receipt Template" %}</b><span class="muted">{% trans "80mm" %}</span></div>
+      <div class="row"><b>{% trans "Users" %}</b><span class="muted">{% trans "Admin Panel" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="/admin/" target="_blank">{% trans "Open Admin" %}</a>
+      <a class="btn btn-outline" href="{% url 'management:home' %}">{% trans "Open Management" %}</a>
+      <form method="get" action="/admin/settings_app/syncsettings/" target="_blank" style="display:inline;">
+        <button class="btn btn-outline" type="submit">{% if LANGUAGE_CODE == "ar" %}إعدادات المزامنة{% else %}{% trans "Sync Settings" %}{% endif %}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "About" %}</h2>
+      <span class="tag">{% trans "Support" %}</span>
+    </div>
+    <p class="muted">{% trans "Product support and company contact details." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Developed by" %}</b><span class="muted">Deedarian Software Solutions</span></div>
+      <div class="row"><b>{% trans "Call" %}</b><span class="muted">+968 72846363</span></div>
+      <div class="row"><b>{% trans "WhatsApp" %}</b><span class="muted">+968 99850826</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Recommended Next Setup" %}</h2>
+    <span class="muted">{% trans "Quick checklist" %}</span>
+  </div>
+
+  <div class="plan">
+    <div class="step">
+      <div class="n">1</div>
+      <div>
+        <b>{% trans "Seed Catalog Defaults" %}</b>
+        <div class="muted">{% trans "Open Catalog → click “Seed Defaults” once to create items/services/prices/barcodes." %}</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="n">2</div>
+      <div>
+        <b>{% trans "Update Prices" %}</b>
+        <div class="muted">{% trans "Use Admin to edit prices per service." %}</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="n">3</div>
+      <div>
+        <b>{% trans "Barcode Test" %}</b>
+        <div class="muted">{% trans "POS → scan “S001” → should select Shirt automatically." %}</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="n">4</div>
+      <div>
+        <b>{% trans "Print Test" %}</b>
+        <div class="muted">{% trans "POS → Save & Print → verify receipt format for 80mm printer." %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

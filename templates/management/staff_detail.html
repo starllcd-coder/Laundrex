@@ -1,0 +1,91 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Staff" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Staff" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Staff" %}: {{ staff_user.username }}</h1>
+    <p class="sub">{% trans "Assign branch and role groups." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'management:staff' %}">{% trans "Back" %}</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Assignment" %}</h2>
+    </div>
+
+    <form method="post" class="pay-form">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Branch" %}</label>
+          <select name="branch">
+            <option value="">{% trans "None" %}</option>
+            {% for b in branches %}
+              <option value="{{ b.id }}" {% if profile.branch and profile.branch.id == b.id %}selected{% endif %}>{{ b.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field grow">
+          <label>{% trans "Override Branch" %}</label>
+          <select name="can_override_branch">
+            <option value="0" {% if not profile.can_override_branch %}selected{% endif %}>{% trans "No" %}</option>
+            <option value="1" {% if profile.can_override_branch %}selected{% endif %}>{% trans "Yes" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Preferred Language" %}</label>
+          <select name="preferred_language">
+            <option value="en" {% if profile.preferred_language == "en" %}selected{% endif %}>{% trans "English" %}</option>
+            <option value="ar" {% if profile.preferred_language == "ar" %}selected{% endif %}>{% trans "Arabic" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Groups (Roles)" %}</label>
+          <div class="check-row">
+            {% for g in groups %}
+              <label class="check-inline">
+                <input type="checkbox" name="groups" value="{{ g.id }}" {% if g in staff_user.groups.all %}checked{% endif %} />
+                {{ g.name }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Profile" %}</h2>
+    </div>
+    <div class="kv">
+      <div><span>{% trans "Username" %}</span><b>{{ staff_user.username }}</b></div>
+      <div><span>{% trans "Email" %}</span><b>{{ staff_user.email|default:"-" }}</b></div>
+      <div><span>{% trans "Superuser" %}</span><b>{% if staff_user.is_superuser %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</b></div>
+      <div><span>{% trans "Branch" %}</span><b>{{ profile.branch.name|default:"-" }}</b></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

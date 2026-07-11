@@ -1,0 +1,17 @@
+@import url("/static/css/orders.css");
+
+.head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:16px; }
+.actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.h1{ margin:0; font-size:34px; letter-spacing:-.5px; color:#1B2A44; }
+.sub{ margin:6px 0 0; color:#64748B; font-weight:600; }
+
+.grid{ display:grid; grid-template-columns: 1fr 1.3fr; gap:14px; }
+@media (max-width:1100px){ .grid{ grid-template-columns:1fr; } }
+
+.neg{ color:#b91c1c; }
+.note{ margin-top:12px; }
+
+.pay-form .form-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:12px; }
+.pay-form .field{ min-width:200px; }
+.pay-form .mini-actions{ margin-top:6px; }
+.error{ background:#FFF1F2; border:1px solid #FFE4E6; color:#9F1239; padding:10px 12px; border-radius:12px; font-weight:800; margin-bottom:12px; }

@@ -1,0 +1,139 @@
+/* Screen preview */
+:root{
+  --paper: #ffffff;
+  --ink: #0b1220;
+  --muted: #64748b;
+  --line: #e5e7eb;
+}
+
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  background:#f2f6ff;
+  color:var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  display:flex;
+  justify-content:center;
+  padding:18px;
+}
+
+.paper{
+  width: 360px;           /* preview width on screen */
+  background: var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 14px 10px;
+  box-shadow: 0 18px 40px rgba(2,24,74,.12);
+}
+
+.center{ text-align:center; }
+.logo{
+  width: 210px;
+  max-width:100%;
+  height:auto;
+  display:block;
+  margin: 0 auto 8px;
+}
+.tag{ font-size:12px; font-weight:700; color:var(--muted); }
+
+.hr{
+  border-top: 1px dashed #cbd5e1;
+  margin: 10px 0;
+}
+
+.kv{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:12px;
+}
+.kv > div{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.kv span{ color:var(--muted); font-weight:700; }
+.kv b{ font-weight:900; }
+
+.items-head{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.items .row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid #f1f5f9;
+}
+.items .row:last-child{ border-bottom:0; }
+
+.name{ font-size:13px; font-weight:900; }
+.muted{ color:var(--muted); font-weight:700; font-size:12px; margin-left:6px; }
+.right{ text-align:right; }
+
+.totals{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:12px;
+}
+.totals > div{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.totals span{ color:var(--muted); font-weight:800; }
+.totals b{ font-weight:900; }
+.totals .grand{
+  font-size:14px;
+  padding-top:6px;
+}
+
+.small{ font-size:12px; font-weight:800; }
+.actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:12px;
+}
+.btn{
+  border:0;
+  background:#0b2a52;
+  color:#fff;
+  font-weight:900;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+}
+.btn.ghost{
+  background:#fff;
+  color:#0b2a52;
+  border:1px solid #cbd5e1;
+}
+
+/* 🔥 Thermal print (80mm) */
+@media print{
+  @page{
+    size: 80mm auto;
+    margin: 0;
+  }
+  body{
+    background:#fff;
+    padding:0;
+    display:block;
+  }
+  .paper{
+    width: 80mm;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    padding: 6mm 4mm 6mm;
+  }
+  .no-print{ display:none !important; }
+}

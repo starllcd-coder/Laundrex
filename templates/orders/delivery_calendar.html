@@ -1,0 +1,150 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}تقويم التوصيل{% else %}{% trans "Delivery Calendar" %}{% endif %} | Laundrex{% endblock %}
+{% block topbar_title %}{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}تقويم التوصيل{% else %}{% trans "Delivery Calendar" %}{% endif %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+{% csrf_token %}
+<div class="orders-head orders-head--with-actions">
+  <div>
+    <h1 class="h1">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}تقويم التوصيل{% else %}{% trans "Delivery Calendar" %}{% endif %}</h1>
+    <p class="sub">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}مجمّع حسب فترة التوصيل{% else %}{% trans "Grouped by delivery slot" %}{% endif %} • {{ date }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'orders:delivery_list' %}">{% if LANGUAGE_CODE == "ar" %}القائمة{% else %}{% trans "List" %}{% endif %}</a>
+    <a class="btn btn-outline" href="{% url 'orders:delivery_board' %}">{% if LANGUAGE_CODE == "ar" %}لوحة{% else %}{% trans "Board" %}{% endif %}</a>
+    <a class="btn btn-outline" href="{% url 'orders:delivery_week' %}?date={{ date }}">{% if LANGUAGE_CODE == "ar" %}أسبوع{% else %}{% trans "Week" %}{% endif %}</a>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label>{% trans "Search" %}</label>
+    <input name="q" value="{{ q }}" placeholder="{% trans "Order #, phone, customer" %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Date" %}</label>
+    <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat..." %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Driver" %}</label>
+    <input name="driver" value="{{ driver }}" placeholder="{% trans "Driver name" %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Zone" %}</label>
+    <input name="zone" value="{{ zone }}" placeholder="{% trans "Qurum..." %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Status" %}</label>
+    <select name="status">
+      <option value="">{% trans "All" %}</option>
+      {% for code,label in status_choices %}
+        <option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="calendar-grid">
+  {% for g in groups %}
+  <section class="calendar-col" data-slot="{{ g.slot_value }}">
+    <div class="calendar-head">
+      <div class="calendar-title">
+        {% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}
+          {% if g.slot == "Morning" %}صباح
+          {% elif g.slot == "Afternoon" %}ظهر
+          {% elif g.slot == "Evening" %}مساء
+          {% else %}{{ g.slot }}{% endif %}
+        {% else %}
+          {{ g.slot }}
+        {% endif %}
+      </div>
+      <span class="pill">{{ g.orders|length }}</span>
+    </div>
+    <div class="calendar-list">
+      {% for o in g.orders %}
+      <article class="calendar-card" draggable="true" data-order="{{ o.order_no }}">
+        <div class="card-top">
+          <div>
+            <a class="link" href="{% url 'orders:delivery_detail' o.order_no %}">#{{ o.order_no }}</a>
+            {% if o.is_delayed %}<span class="badge-delay">{% trans "Delayed" %}</span>{% endif %}
+          </div>
+          <span class="muted">{{ o.created_at|date:"H:i" }}</span>
+        </div>
+          <div class="kv">
+            <div><span>{% trans "Customer" %}</span><b>{{ o.customer.name|default:walk_in_label }}</b></div>
+            <div><span>{% trans "Phone" %}</span><b>{{ o.customer.phone|default:"-" }}</b></div>
+            <div><span>{% trans "Driver" %}</span><b>{{ o.delivery_driver_name|default:"-" }}</b></div>
+            <div><span>{% trans "Zone" %}</span><b>{{ o.delivery_zone|default:"-" }}</b></div>
+            <div><span>{% trans "Status" %}</span><b>{{ o.get_delivery_status_display }}</b></div>
+          </div>
+      <div class="card-actions">
+        <a class="btn-sm" href="{% url 'orders:delivery_detail' o.order_no %}">{% trans "Open" %}</a>
+      </div>
+      </article>
+      {% empty %}
+      <div class="empty">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}لا توجد عمليات توصيل{% else %}{% trans "No deliveries" %}{% endif %}</div>
+      {% endfor %}
+    </div>
+  </section>
+  {% empty %}
+  <div class="muted">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}لا توجد عمليات توصيل{% else %}{% trans "No deliveries found." %}{% endif %}</div>
+  {% endfor %}
+</div>
+
+<script>
+  const csrfToken = (document.querySelector("[name=csrfmiddlewaretoken]") || {}).value;
+  const cols = document.querySelectorAll(".calendar-col");
+  const cards = document.querySelectorAll(".calendar-card");
+
+  cards.forEach(card => {
+    card.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", card.dataset.order || "");
+    });
+  });
+
+  cols.forEach(col => {
+    col.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      col.classList.add("drop-target");
+    });
+    col.addEventListener("dragleave", () => col.classList.remove("drop-target"));
+    col.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      col.classList.remove("drop-target");
+      const orderNo = e.dataTransfer.getData("text/plain");
+      const slot = col.dataset.slot || "";
+      if(!orderNo) return;
+      const res = await fetch(`/orders/delivery/${orderNo}/slot-update/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": csrfToken
+        },
+        body: `delivery_slot=${encodeURIComponent(slot)}`
+      });
+      if(res.ok){
+        location.reload();
+      } else {
+        alert("Failed to update slot");
+      }
+    });
+  });
+</script>
+
+{% endblock %}

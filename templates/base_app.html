@@ -1,0 +1,318 @@
+﻿{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Laundrex{% endblock %}</title>
+  <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon" />
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  {% block head %}{% endblock %}
+</head>
+<body dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-left">
+        <img class="topbar-logo" src="{% static 'assets/laundrex-logo-icon.svg' %}" alt="Laundrex">
+        <span class="topbar-title">{% block topbar_title %}Laundrex{% endblock %}</span>
+      </div>
+      <div class="topbar-right">
+        <span class="chip">{{ active_business_name }}</span>
+        <form method="post" action="{% url 'accounts:set_language' %}" class="lang-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+          <button class="chip {% if LANGUAGE_CODE == 'en' %}active{% endif %}" name="lang" value="en" type="submit">EN</button>
+          <button class="chip {% if LANGUAGE_CODE == 'ar' %}active{% endif %}" name="lang" value="ar" type="submit">{% if LANGUAGE_CODE == 'ar' %}عربي{% else %}AR{% endif %}</button>
+        </form>
+        <span class="chip">{{ request.user.username|capfirst }} · {{ active_user_role }}</span>
+        <span class="chip" id="topbar-datetime" data-lang="{{ LANGUAGE_CODE }}"></span>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <aside class="sidebar">
+        <div class="sidebar-nav">
+        <a class="nav-card {% if request.resolver_match.namespace == 'core' %}active{% endif %}"
+           href="{% url 'core:home' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Dashboard -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 13.5V20a1 1 0 0 0 1 1h5v-7.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21h5a1 1 0 0 0 1-1v-6.5a1 1 0 0 0-.35-.76l-8-6.8a1 1 0 0 0-1.3 0l-8 6.8A1 1 0 0 0 4 13.5Z"
+                    stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Dashboard" %}</span>
+        </a>
+
+        <a class="nav-card {% if request.resolver_match.namespace == 'pos' %}active{% endif %}"
+           href="{% url 'pos:new_order' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- POS -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7 4h10v4H7V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M6 8h12v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M8 12h8M8 15h8M8 18h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "POS" %}</span>
+        </a>
+
+        <a class="nav-card {% if request.resolver_match.namespace == 'orders' and request.resolver_match.url_name != 'delivery_list' and request.resolver_match.url_name != 'delivery_detail' and request.resolver_match.url_name != 'pickup' and request.resolver_match.url_name != 'customers' and request.resolver_match.url_name != 'customer_detail' %}active{% endif %}"
+           href="{% url 'orders:list' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Orders -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7 7h10l-1 13H8L7 7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M9 7a3 3 0 1 1 6 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Orders" %}</span>
+        </a>
+
+        <a class="nav-card {% if request.resolver_match.url_name == 'customers' or request.resolver_match.url_name == 'customer_detail' %}active{% endif %}"
+           href="{% url 'orders:customers' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Customers -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M20 8v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M23 11h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Customers" %}</span>
+        </a>
+
+        <a class="nav-card {% if request.resolver_match.url_name == 'pickup' %}active{% endif %}"
+           href="{% url 'orders:pickup' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Pickup Counter -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 7h16v10H4V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M7 11h10M7 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Pickup" %}</span>
+        </a>
+
+        {% if perms.orders.can_manage_delivery %}
+        <a class="nav-card {% if request.resolver_match.url_name == 'delivery_list' or request.resolver_match.url_name == 'delivery_detail' %}active{% endif %}"
+           href="{% url 'orders:delivery_list' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Delivery -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 7h11v10H3V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M14 10h4l3 3v4h-7V10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="7" cy="18" r="2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="18" cy="18" r="2" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Delivery" %}</span>
+        </a>
+        {% endif %}
+
+        {% if perms.orders.can_view_reports or perms.orders.can_manage_staff %}
+        <a class="nav-card {% if request.resolver_match.namespace == 'payments' %}active{% endif %}"
+           href="{% url 'payments:list' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Payments -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"
+                    stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M7 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Payments" %}</span>
+        </a>
+        {% endif %}
+
+        {% if perms.orders.can_view_reports %}
+        <a class="nav-card {% if request.resolver_match.namespace == 'reports' %}active{% endif %}"
+           href="{% url 'reports:home' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Reports -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M5 20V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 16v-6M12 16v-9M16 16v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Reports" %}</span>
+        </a>
+        {% endif %}
+
+        {% if perms.orders.can_manage_staff %}
+        <a class="nav-card {% if request.resolver_match.namespace == 'management' %}active{% endif %}"
+           href="{% url 'management:home' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Management -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M19.4 15a8 8 0 0 0 .1-2l2-1.2-2-3.4-2.2.6a7.7 7.7 0 0 0-1.7-1l-.3-2.2H10.7l-.3 2.2c-.6.2-1.2.6-1.7 1l-2.2-.6-2 3.4 2 1.2a8 8 0 0 0 .1 2l-2 1.2 2 3.4 2.2-.6c.5.4 1.1.8 1.7 1l.3 2.2h3.9l.3-2.2c.6-.2 1.2-.6 1.7-1l2.2.6 2-3.4-2-1.2Z"
+                    stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Management" %}</span>
+        </a>
+        {% endif %}
+
+        {% if perms.orders.can_edit_catalog or perms.orders.can_manage_staff %}
+        <a class="nav-card {% if request.resolver_match.namespace == 'settings_app' %}active{% endif %}"
+           href="{% url 'settings_app:home' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- Settings -->
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M21 12a8.4 8.4 0 0 0-.1-1l-2-.7a7.8 7.8 0 0 0-.6-1.4l1.1-1.8-2-2-1.8 1.1c-.4-.2-.9-.5-1.4-.6L13 3h-2l-.7 2.1c-.5.1-1 .3-1.4.6L7.1 4.6l-2 2 1.1 1.8c-.2.4-.5.9-.6 1.4L3 11v2l2.1.7c.1.5.3 1 .6 1.4L4.6 16.9l2 2 1.8-1.1c.4.2.9.5 1.4.6L11 21h2l.7-2.1c.5-.1 1-.3 1.4-.6l1.8 1.1 2-2-1.1-1.8c.2-.4.5-.9.6-1.4L21 13v-1Z"
+                    stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Settings" %}</span>
+        </a>
+        {% endif %}
+        <a class="nav-card logout-card" href="{% url 'accounts:logout' %}">
+          <span class="nav-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M10 17l-5-5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M14 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-text">{% trans "Logout" %}</span>
+        </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <div id="live-order-toast" style="position:fixed;top:18px;right:18px;z-index:2000;display:none;max-width:360px;background:#134b8a;color:#fff;padding:12px 14px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.2);font-weight:700;"></div>
+
+  {% block scripts %}{% endblock %}
+  <script>
+        (function () {
+      const toast = document.getElementById('live-order-toast');
+      if (!toast) return;
+      const isAr = document.documentElement.lang && document.documentElement.lang.toLowerCase().startsWith('ar');
+      const sinceKey = 'laundrex_live_since_{{ request.user.id }}';
+      const pollMs = 15000;
+      let pollTimer = null;
+
+      async function logEvent(event, payload) {
+        try {
+          await fetch('/orders/api/live-debug/', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event, payload: payload || {} }),
+          });
+        } catch (_) {}
+      }
+
+      function beep() {
+        try {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          const ctx = new Ctx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = 880;
+          gain.gain.value = 0.04;
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          setTimeout(() => {
+            osc.stop();
+            ctx.close();
+          }, 180);
+        } catch (_) {}
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+        toast.style.left = isAr ? '18px' : '';
+        toast.style.right = isAr ? '' : '18px';
+        beep();
+        logEvent('toast_shown', { message });
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 5000);
+      }
+
+      async function poll() {
+        let since = localStorage.getItem(sinceKey) || '';
+        const url = '/orders/api/live-check/' + (since ? ('?since=' + encodeURIComponent(since)) : '');
+        try {
+          const res = await fetch(url, { credentials: 'same-origin' });
+          if (!res.ok) return;
+          const data = await res.json();
+          const latest = data.latest_created_at || '';
+          const count = Number(data.new_count || 0);
+          const orderNo = data.latest_order_no || '';
+          logEvent('poll_response', { count, orderNo, latest, since });
+
+          if (!since) {
+            if (latest) localStorage.setItem(sinceKey, latest);
+            logEvent('poll_baseline_set', { latest });
+            return;
+          }
+
+          if (count > 0) {
+            logEvent('new_orders_detected', { count, orderNo });
+            const msg = isAr
+              ? `طلب جديد وصل من تطبيق الجوال${orderNo ? ' #' + orderNo : ''}`
+              : `New order received from mobile app${orderNo ? ' #' + orderNo : ''}`;
+            showToast(msg);
+          }
+
+          if (latest) localStorage.setItem(sinceKey, latest);
+        } catch (e) {
+          logEvent('poll_error', { error: String(e) });
+        }
+      }
+
+      poll();
+      pollTimer = setInterval(poll, pollMs);
+      window.addEventListener('beforeunload', () => {
+        if (pollTimer) clearInterval(pollTimer);
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      const node = document.getElementById('topbar-datetime');
+      if (!node) return;
+      const lang = (node.dataset.lang || 'en').toLowerCase();
+      const isAr = lang.startsWith('ar');
+      const locale = isAr ? 'ar-OM' : 'en-OM';
+      const format = new Intl.DateTimeFormat(locale, {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: !isAr,
+        timeZone: 'Asia/Muscat',
+      });
+      const tick = () => {
+        node.textContent = format.format(new Date());
+      };
+      tick();
+      setInterval(tick, 30000);
+    })();
+  </script>
+</body>
+</html>
+
+

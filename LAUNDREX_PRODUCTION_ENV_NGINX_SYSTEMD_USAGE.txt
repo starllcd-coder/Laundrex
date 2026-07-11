@@ -1,0 +1,261 @@
+﻿LAUNDREX PRODUCTION TEMPLATES + HOW TO USE
+==========================================
+Project: C:\Users\LENOVO\Desktop\laundrex
+
+This file gives copy-paste templates for:
+1) .env (production)
+2) gunicorn systemd service
+3) nginx site config
+4) exact apply steps
+
+
+SECTION 1) PRODUCTION .env TEMPLATE (MATCHES YOUR SETTINGS.PY)
+===============================================================
+Create this file on server at:
+/var/www/laundrex/.env
+
+Template:
+---------
+DJANGO_SECRET_KEY=CHANGE_THIS_TO_LONG_RANDOM_SECRET
+DJANGO_DEBUG=0
+DJANGO_ALLOWED_HOSTS=your-domain.com,www.your-domain.com,127.0.0.1,localhost
+
+# PostgreSQL (managed cloud DB)
+DB_NAME=laundrex_prod
+DB_USER=laundrex_user
+DB_PASSWORD=CHANGE_DB_PASSWORD
+DB_HOST=YOUR_DB_HOST
+DB_PORT=5432
+
+# Public app URL
+SITE_BASE_URL=https://your-domain.com
+
+# CORS (set your real mobile/web origins)
+CORS_ALLOW_ALL_ORIGINS=0
+
+# Security
+SECURE_SSL_REDIRECT=1
+SESSION_COOKIE_SECURE=1
+CSRF_COOKIE_SECURE=1
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=1
+SECURE_HSTS_PRELOAD=1
+
+# Optional feature flags
+SOCIAL_GOOGLE_ENABLED=0
+SOCIAL_APPLE_ENABLED=0
+CARD_PAY_ENABLED=0
+APPLE_PAY_ENABLED=0
+GOOGLE_PAY_ENABLED=0
+ANALYTICS_ENABLED=0
+
+# Bank transfer defaults (can also be configured in admin)
+BANK_TRANSFER_ENABLED=1
+BANK_TRANSFER_BANK_NAME=
+BANK_TRANSFER_ACCOUNT_NAME=
+BANK_TRANSFER_ACCOUNT_NUMBER=
+BANK_TRANSFER_IBAN=
+BANK_TRANSFER_INSTRUCTIONS=Use your order number as reference and upload transfer proof if available.
+
+# WhatsApp (keep disabled until configured)
+WHATSAPP_ENABLED=0
+WHATSAPP_API_VERSION=v18.0
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_VERIFY_TOKEN=
+WHATSAPP_APP_SECRET=
+
+# Hybrid sync (keep disabled unless needed)
+SYNC_ENABLED=0
+SYNC_ENDPOINTS_ENABLED=0
+SYNC_API_TOKEN=
+CLOUD_BASE_URL=
+SYNC_INTERVAL_SECONDS=120
+
+
+SECTION 2) GUNICORN SYSTEMD SERVICE TEMPLATE
+============================================
+Create file:
+/etc/systemd/system/laundrex.service
+
+Template:
+---------
+[Unit]
+Description=Laundrex Django Gunicorn
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/laundrex
+Environment="PATH=/var/www/laundrex/.venv/bin"
+ExecStart=/var/www/laundrex/.venv/bin/gunicorn laundrex.wsgi:application --workers 3 --bind unix:/run/laundrex.sock --timeout 120
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+
+SECTION 3) NGINX SITE TEMPLATE
+==============================
+Create file:
+/etc/nginx/sites-available/laundrex
+
+Template:
+---------
+server {
+    listen 80;
+    server_name your-domain.com www.your-domain.com;
+
+    client_max_body_size 20M;
+
+    location /static/ {
+        alias /var/www/laundrex/static/;
+    }
+
+    location /media/ {
+        alias /var/www/laundrex/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/laundrex.sock;
+    }
+}
+
+Enable site:
+------------
+sudo ln -s /etc/nginx/sites-available/laundrex /etc/nginx/sites-enabled/laundrex
+sudo nginx -t
+sudo systemctl reload nginx
+
+
+SECTION 4) HOW TO USE (STEP BY STEP)
+====================================
+
+Step 1) SSH into server
+-----------------------
+ssh your-user@your-server-ip
+
+Step 2) Install packages
+------------------------
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3-pip python3-venv nginx git
+
+Step 3) Put project on server
+-----------------------------
+sudo mkdir -p /var/www
+cd /var/www
+sudo git clone <YOUR_GIT_REPO_URL> laundrex
+sudo chown -R $USER:$USER /var/www/laundrex
+cd /var/www/laundrex
+
+Step 4) Create venv and install Python deps
+-------------------------------------------
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install gunicorn psycopg2-binary whitenoise
+
+Step 5) Create production .env
+------------------------------
+nano /var/www/laundrex/.env
+Paste Section 1 template and fill real values.
+
+Step 6) Run Django setup
+------------------------
+cd /var/www/laundrex
+source .venv/bin/activate
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py check
+python manage.py createsuperuser
+
+Step 7) Add systemd service
+---------------------------
+sudo nano /etc/systemd/system/laundrex.service
+Paste Section 2 template.
+
+Then run:
+sudo systemctl daemon-reload
+sudo systemctl enable laundrex
+sudo systemctl start laundrex
+sudo systemctl status laundrex
+
+Step 8) Add Nginx config
+------------------------
+sudo nano /etc/nginx/sites-available/laundrex
+Paste Section 3 template.
+
+Then run:
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/laundrex /etc/nginx/sites-enabled/laundrex
+sudo nginx -t
+sudo systemctl restart nginx
+
+Step 9) Point domain DNS
+------------------------
+In your domain provider DNS panel:
+- A record: @ -> SERVER_PUBLIC_IP
+- A record: www -> SERVER_PUBLIC_IP
+Wait propagation.
+
+Step 10) Add HTTPS certificate
+------------------------------
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+sudo certbot renew --dry-run
+
+Step 11) Final verification
+---------------------------
+1. Open https://your-domain.com
+2. Open https://your-domain.com/admin/
+3. Login and test order flow
+4. Test mobile API endpoint from browser/postman
+5. Confirm static/media files load correctly
+
+
+SECTION 5) MOBILE STORE USAGE AFTER DOMAIN GO-LIVE
+===================================================
+
+Android (Play Store)
+--------------------
+1. Build signed app bundle with production URL:
+   flutter build appbundle --release --dart-define=API_BASE_URL=https://your-domain.com
+2. Upload `build/app/outputs/bundle/release/app-release.aab` to Google Play Console.
+3. Complete listing, privacy policy, data safety, and submit review.
+
+iOS (App Store)
+---------------
+1. On Mac:
+   flutter build ios --release --dart-define=API_BASE_URL=https://your-domain.com
+2. Open Xcode, archive app, upload to App Store Connect.
+3. Complete metadata + privacy and submit review.
+
+
+SECTION 6) OPTIONAL HARDENING (RECOMMENDED)
+===========================================
+1. Disable password SSH login, use SSH keys only.
+2. Enable firewall:
+   sudo ufw allow OpenSSH
+   sudo ufw allow 'Nginx Full'
+   sudo ufw enable
+3. Auto backup database daily (pg_dump) + media backup.
+4. Monitor service logs:
+   sudo journalctl -u laundrex -f
+   sudo tail -f /var/log/nginx/error.log
+
+
+SECTION 7) QUICK UPDATE DEPLOYMENT FLOW (LATER)
+================================================
+When you push new code:
+cd /var/www/laundrex
+git pull
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic --noinput
+sudo systemctl restart laundrex
+sudo systemctl reload nginx

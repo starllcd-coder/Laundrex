@@ -1,0 +1,192 @@
+﻿LAUNDREX - STEP BY STEP COMMANDS (WEB / DESKTOP / MOBILE)
+=========================================================
+Project root:
+C:\Users\LENOVO\Desktop\laundrex
+
+NOTE:
+- Run commands from PowerShell unless stated otherwise.
+- Windows path to Python (your system):
+  C:\Users\LENOVO\AppData\Local\Programs\Python\Python310\python.exe
+
+
+SECTION 1) CREATE .venv + INSTALL requirements.txt
+---------------------------------------------------
+1. Go to project root:
+   cd C:\Users\LENOVO\Desktop\laundrex
+
+2. Create virtual environment:
+   & "C:\Users\LENOVO\AppData\Local\Programs\Python\Python310\python.exe" -m venv .venv
+
+3. Activate virtual environment:
+   .\.venv\Scripts\Activate.ps1
+
+4. Upgrade pip (recommended):
+   python -m pip install --upgrade pip
+
+5. Install requirements:
+   pip install -r requirements.txt
+
+6. Apply migrations:
+   python manage.py migrate
+
+7. Optional check:
+   python manage.py check
+
+
+SECTION 2) RUN WEB APP (Django)
+-------------------------------
+1. From root + activated .venv:
+   cd C:\Users\LENOVO\Desktop\laundrex
+   .\.venv\Scripts\Activate.ps1
+
+2. Run web server:
+   python manage.py runserver
+
+3. Open:
+   http://127.0.0.1:8000
+
+
+SECTION 3) RUN DESKTOP APP (Wrapper)
+------------------------------------
+1. From root + activated .venv:
+   cd C:\Users\LENOVO\Desktop\laundrex
+   .\.venv\Scripts\Activate.ps1
+
+2. Run desktop wrapper (starts local desktop backend itself):
+   python desktop_app\run_desktop.py
+
+3. Alternate run:
+   python desktop_app\main.py
+
+
+SECTION 4) BUILD DESKTOP EXE (Windows)
+--------------------------------------
+1. From root + activated .venv:
+   cd C:\Users\LENOVO\Desktop\laundrex
+   .\.venv\Scripts\Activate.ps1
+
+2. Install pyinstaller:
+   python -m pip install pyinstaller
+
+3. Build exe (creates build + dist folders):
+   python -m PyInstaller --noconfirm --clean --windowed --name LaundrexDesktop --icon static\assets\favicon.ico --collect-submodules rest_framework --collect-submodules rest_framework_simplejwt --collect-submodules corsheaders --collect-submodules dotenv --collect-submodules apps desktop_app\run_desktop.py
+
+4. Output executable:
+   .\dist\LaundrexDesktop\LaundrexDesktop.exe
+
+5. Clean old build artifacts (optional):
+   Remove-Item -Recurse -Force .\build
+   Remove-Item -Recurse -Force .\dist
+   Remove-Item -Force .\LaundrexDesktop.spec
+
+
+SECTION 5) CREATE DESKTOP INSTALLER (.exe) FOR WINDOWS
+------------------------------------------------------
+Option A (Recommended): Inno Setup
+1. Install Inno Setup 6.
+2. Create .iss script (example name: installer\LaundrexDesktop.iss).
+3. Build installer from terminal:
+   & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "C:\Users\LENOVO\Desktop\Laundrex_Final\laundrex\installer\LaundrexDesktop.iss"
+
+4. Output installer usually in:
+   installer\Output\LaundrexDesktopSetup.exe
+
+Option B: NSIS
+1. Install NSIS.
+2. Compile your .nsi script:
+   "C:\Program Files (x86)\NSIS\makensis.exe" installer\LaundrexDesktop.nsi
+
+
+SECTION 6) MOBILE APP - RUN (FLUTTER)
+-------------------------------------
+1. Go to Flutter app folder:
+   cd C:\Users\LENOVO\Desktop\laundrex\laundrex_mobile_app\flutter_app
+
+2. Get packages:
+   flutter pub get
+
+3. Run on Chrome (as you already use):
+   flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
+
+4. Run on Android device/emulator:
+   flutter run -d android --dart-define=API_BASE_URL=http://127.0.0.1:8000
+
+
+SECTION 7) BUILD ANDROID APK (for direct install/testing)
+---------------------------------------------------------
+1. Go to Flutter app folder:
+   cd C:\Users\LENOVO\Desktop\laundrex\laundrex_mobile_app\flutter_app
+
+2. Build release APK:
+   flutter build apk --release --dart-define=API_BASE_URL=https://your-domain.com
+
+3. Output APK:
+   .\build\app\outputs\flutter-apk\app-release.apk
+
+
+SECTION 8) BUILD ANDROID APP BUNDLE (AAB) FOR PLAY STORE
+---------------------------------------------------------
+1. Ensure Android signing config is set in android\app\build.gradle and keystore.
+2. Build AAB:
+   flutter build appbundle --release --dart-define=API_BASE_URL=https://your-domain.com
+
+3. Output AAB:
+   .\build\app\outputs\bundle\release\app-release.aab
+
+4. Upload .aab to Google Play Console.
+
+
+SECTION 9) BUILD iOS APP (iPhone) + APP STORE
+----------------------------------------------
+IMPORTANT: iOS build requires macOS + Xcode.
+
+1. On Mac, go to Flutter app folder and get deps:
+   flutter pub get
+
+2. Build iOS release:
+   flutter build ios --release --dart-define=API_BASE_URL=https://your-domain.com
+
+3. Open iOS project in Xcode:
+   open ios/Runner.xcworkspace
+
+4. In Xcode:
+   - Set Team and Bundle Identifier
+   - Select Generic iOS Device
+   - Product > Archive
+
+5. Upload archive to App Store Connect using Organizer.
+
+Alternative CLI export (advanced):
+   xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/ios/archive/Runner.xcarchive archive
+
+
+SECTION 10) QUICK DAILY START COMMANDS
+--------------------------------------
+A) Start web backend quickly:
+   cd C:\Users\LENOVO\Desktop\laundrex
+   .\.venv\Scripts\Activate.ps1
+   python manage.py runserver
+
+B) Start desktop app quickly:
+   cd C:\Users\LENOVO\Desktop\laundrex
+   .\.venv\Scripts\Activate.ps1
+   python desktop_app\run_desktop.py
+
+C) Start mobile app quickly (Chrome):
+   cd C:\Users\LENOVO\Desktop\laundrex\laundrex_mobile_app\flutter_app
+   flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
+
+
+SECTION 11) OPTIONAL CLEAN COMMANDS
+-----------------------------------
+A) Flutter clean:
+   cd C:\Users\LENOVO\Desktop\laundrex\laundrex_mobile_app\flutter_app
+   flutter clean
+   flutter pub get
+
+B) Remove and recreate Python venv:
+   cd C:\Users\LENOVO\Desktop\laundrex
+   Remove-Item -Recurse -Force .\.venv
+   & "C:\Users\LENOVO\AppData\Local\Programs\Python\Python310\python.exe" -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt

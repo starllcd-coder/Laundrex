@@ -1,0 +1,302 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %} | Laundrex{% endblock %}
+{% block topbar_title %}{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+
+<div class="orders-head orders-head--with-actions">
+  <div>
+    <h1 class="h1">{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}</h1>
+    <p class="sub">
+      {% trans "Branch" %}: <b>{{ order.branch }}</b> •
+      {% trans "Status" %}: <span class="pill {{ order.status|lower }}">{{ order.get_status_display }}</span>
+      {% if is_delayed %}<span class="badge-delay">{% trans "Delayed" %} {{ delay_hours }}h+</span>{% endif %}
+    </p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'orders:list' %}">{% trans "Back" %}</a>
+    <a class="btn btn-primary" target="_blank" href="{% url 'pos:receipt_80mm' %}?order={{ order.order_no }}">{% trans "Reprint Receipt" %}</a>
+  </div>
+</div>
+
+<div class="actions-row">
+  <form method="post" action="{% url 'orders:set_urgent' order.order_no %}">
+    {% csrf_token %}
+    <input type="hidden" name="urgent" value="{% if order.urgent %}0{% else %}1{% endif %}" />
+    <button class="btn {% if order.urgent %}btn-danger{% else %}btn-outline{% endif %}" type="submit">
+      {% if order.urgent %}{% trans "Clear Urgent" %}{% else %}{% trans "Mark Urgent" %}{% endif %}
+    </button>
+  </form>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Customer" %}</h2>
+      <span class="muted">{% trans "Created" %}: {{ order.created_at }}</span>
+    </div>
+    <div class="kv">
+      <div><span>{% trans "Name" %}</span><b>{{ order.customer.name|default:walk_in_label }}</b></div>
+      <div><span>{% trans "Phone" %}</span><b>{{ order.customer.phone|default:"" }}</b></div>
+      <div><span>{% trans "Address" %}</span><b>{{ order.customer.address|default:"-" }}</b></div>
+      <div><span>{% trans "Address 2" %}</span><b>{{ order.customer.address2|default:"-" }}</b></div>
+      <div><span>{% trans "Cashier" %}</span><b>{{ order.cashier.username|default:"-" }}</b></div>
+      <div><span>{% trans "Notes" %}</span><b>{{ order.notes|default:"-" }}</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Totals" %}</h2>
+      <span class="muted">{% trans "Updated" %}: {{ order.updated_at }}</span>
+    </div>
+  <div class="kv">
+    <div><span>{% trans "Subtotal" %}</span><b>{{ order.subtotal }}</b></div>
+    <div><span>{% trans "Discount" %}</span><b>{{ order.discount }}</b></div>
+    <div><span>{% trans "Tax" %}</span><b>{{ order.tax }}</b></div>
+    <div class="grand"><span>{% trans "Total" %}</span><b>{{ order.total }}</b></div>
+    <div><span>{% trans "Paid" %}</span><b>{{ order.paid }}</b></div>
+    <div><span>{% trans "Amount Due" %}</span><b>{{ order.balance }}</b></div>
+    <div><span>{% trans "ETA Ready" %}</span><b>{{ order.estimated_ready_at|default:"-" }}</b></div>
+  </div>
+</div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Delivery" %}</h2>
+    <a class="btn btn-outline" href="{% url 'orders:delivery_detail' order.order_no %}">{% trans "Open Delivery" %}</a>
+  </div>
+  <div class="kv">
+    <div><span>{% trans "Required" %}</span><b>{% if order.delivery_required %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</b></div>
+    <div><span>{% trans "Status" %}</span><b>{{ order.get_delivery_status_display|default:"-" }}</b></div>
+    <div><span>{% trans "Driver" %}</span><b>{{ order.delivery_driver_name|default:"-" }}</b></div>
+    <div><span>{% trans "Slot" %}</span><b>{{ order.delivery_slot|default:"-" }}</b></div>
+    <div><span>{% trans "Fee" %}</span><b>{{ order.delivery_fee }}</b></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Items" %}</h2>
+    <span class="muted">{{ items|length }} {% trans "Items" %}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Item" %}</th>
+          <th>{% trans "Service" %}</th>
+          <th class="right">{% trans "Qty" %}</th>
+          <th class="right">{% trans "Price" %}</th>
+          <th class="right">{% trans "Line Total" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td><b>{{ it.item_name }}</b></td>
+          <td>{{ it.service_name }}</td>
+          <td class="right">{{ it.qty }}</td>
+          <td class="right">{{ it.price }}</td>
+          <td class="right"><b>{{ it.line_total }}</b></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="muted">{% trans "No items." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Pickup Schedule" %}</h2>
+    <span class="muted">{% trans "Optional" %}</span>
+  </div>
+  <form class="pay-form" method="post" action="{% url 'orders:pickup_update' order.order_no %}">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Pickup Date" %}</label>
+        <input type="date" name="pickup_date" value="{{ order.pickup_date|date:'Y-m-d' }}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Pickup Slot" %}</label>
+        <input name="pickup_slot" value="{{ order.pickup_slot }}" placeholder="{% trans "Today 4-6 PM" %}" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Pickup Notes" %}</label>
+        <input name="pickup_notes" value="{{ order.pickup_notes }}" placeholder="{% trans "Leave at counter" %}" />
+      </div>
+    </div>
+    <div class="mini-actions">
+      <button class="btn btn-primary" type="submit">{% trans "Save Pickup" %}</button>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Order Timeline" %}</h2>
+    <span class="muted">{% trans "Latest first" %}</span>
+  </div>
+  <div class="timeline">
+    {% for t in timeline %}
+      <div class="timeline-row">
+        <div class="timeline-time">{{ t.time }}</div>
+        <div class="timeline-body">
+          <div class="timeline-title">{{ t.label }}</div>
+          {% if t.user %}<div class="muted">{% trans "By" %}: {{ t.user }}</div>{% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="muted">{% trans "No timeline yet." %}</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "WhatsApp" %}</h2>
+    <span class="muted">{% trans "Manual send" %}</span>
+  </div>
+
+  <div class="kv">
+    <div><span>{% trans "Opt-in" %}</span><b>{% if order.customer and order.customer.whatsapp_opt_in %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</b></div>
+    <div><span>{% trans "Number" %}</span><b>{{ order.customer.whatsapp_number|default:order.customer.phone|default:"-" }}</b></div>
+  </div>
+
+  <form class="actions-row wa-send-form" method="post" action="{% url 'orders:whatsapp_send' order.order_no %}">
+    {% csrf_token %}
+    <select name="template_key" class="wa-select" required>
+      <option value="">{% trans "Select template" %}</option>
+      {% for t in wa_templates %}
+        <option value="{{ t.key }}">{{ t.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="lang" class="wa-select wa-lang-select">
+      <option value="en">{% trans "English" %}</option>
+      <option value="ar">{% trans "Arabic" %}</option>
+    </select>
+    <button class="btn btn-primary" type="submit">{% trans "Send WhatsApp" %}</button>
+  </form>
+
+  <div class="table-wrap" style="margin-top:12px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Time" %}</th>
+          <th>{% trans "Template" %}</th>
+          <th>{% trans "Language" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th>{% trans "Message" %}</th>
+          <th>{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in wa_logs %}
+        <tr>
+          <td>{{ l.created_at }}</td>
+          <td>{{ l.template_key }}</td>
+          <td>{{ l.language }}</td>
+          <td><b>{{ l.status }}</b></td>
+          <td>{{ l.message_body|default:"-" }}</td>
+          <td>
+            {% if l.status == "failed" and l.attempts < 3 %}
+              <form method="post" action="{% url 'orders:whatsapp_retry' l.id %}">
+                {% csrf_token %}
+                <button class="btn btn-outline" type="submit">{% trans "Retry" %}</button>
+              </form>
+            {% else %}
+              <span class="muted">-</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="muted">{% trans "No messages yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="actions-row">
+  {% if not order.delivery_required and order.status == "READY" %}
+  <form method="post" action="{% url 'orders:mark_collected' order.order_no %}">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">{% trans "Mark Collected" %}</button>
+  </form>
+  {% endif %}
+
+  <form method="post" action="{% url 'orders:advance' order.order_no %}">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">{% trans "Move to" %}: {{ next_status_label }}</button>
+  </form>
+
+  {% if last_status_log %}
+  <form method="post" action="{% url 'orders:undo_status' order.order_no %}">
+    {% csrf_token %}
+    <button class="btn btn-outline" type="submit">{% trans "Undo Last Status" %}</button>
+  </form>
+  {% endif %}
+
+  <form method="post" action="{% url 'orders:cancel' order.order_no %}">
+    {% csrf_token %}
+    <button class="btn btn-danger" type="submit">{% trans "Cancel Order" %}</button>
+  </form>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "History" %}</h2>
+    <span class="muted">{% trans "Status and payments" %}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Time" %}</th>
+          <th>{% trans "Type" %}</th>
+          <th>{% trans "Details" %}</th>
+          <th>{% trans "User" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in status_logs %}
+        <tr>
+          <td>{{ s.created_at }}</td>
+          <td><b>{% trans "Status" %}</b></td>
+          <td>{{ s.from_status_label }} → {{ s.to_status_label }}{% if s.note %} ({{ s.note }}){% endif %}</td>
+          <td>{{ s.created_by.username|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+        {% for p in payments %}
+        <tr>
+          <td>{{ p.created_at }}</td>
+          <td><b>{% trans "Payment" context "payment_record" %}</b></td>
+          <td>{{ p.get_method_display }} {{ p.amount }}{% if p.reference %} ({{ p.reference }}){% endif %}{% if p.proof %} • <a class="link" target="_blank" href="{{ p.proof.url }}">{% trans "Proof" %}</a>{% endif %}</td>
+          <td>{{ p.created_by.username|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+        {% if not status_logs and not payments %}
+        <tr><td colspan="4" class="muted">{% trans "No history yet." %}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

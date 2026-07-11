@@ -1,0 +1,15 @@
+python -m venv venv
+
+venv\Scripts\activate
+
+pip install -r requirements.txt
+
+
+WebApp
+
+python manage.py runserver
+
+
+Desktop App
+
+python -m desktop_app.main

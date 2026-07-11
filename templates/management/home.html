@@ -1,0 +1,130 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Management" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Management" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Management" %}</h1>
+    <p class="sub">{% trans "Branches, users & roles, printers and barcode setup." %}</p>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Branch Management" %}</h2>
+      <span class="tag">{% trans "Active" %}</span>
+    </div>
+    <p class="muted">{% trans "Create branches, set tax and discount rules." %}</p>
+
+    <div class="mini">
+      {% for b in branches %}
+      <div class="row">
+        <b>{{ b.name }}</b>
+        <span class="muted">{% if b.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}</span>
+      </div>
+      {% empty %}
+      <div class="row">
+        <b>{% trans "No branches" %}</b>
+        <span class="muted">{% trans "Add a branch" %}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'management:branches' %}">{% trans "Manage Branches" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Users & Roles" %}</h2>
+      <span class="tag">{% trans "Roles" %}</span>
+    </div>
+    <p class="muted">{% trans "Control permissions: Admin / Manager / Cashier / Worker." %}</p>
+
+    <div class="mini">
+      {% for u in users %}
+      <div class="row">
+        <b>{{ u.username }}</b>
+        <span class="muted">{% if u.is_superuser %}{% trans "Superuser" %}{% else %}{% trans "Staff" %}{% endif %}</span>
+      </div>
+      {% empty %}
+      <div class="row">
+        <b>{% trans "No users" %}</b>
+        <span class="muted">{% trans "Create in admin" %}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'management:staff' %}">{% trans "Manage Staff" %}</a>
+      <a class="btn btn-outline" href="/admin/auth/user/" target="_blank">{% trans "Admin Users" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Audit Logs" %}</h2>
+      <span class="tag">{% trans "Security" %}</span>
+    </div>
+    <p class="muted">{% trans "Track price edits, payments, status changes, and delivery updates." %}</p>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'management:audit_logs' %}">{% trans "Open Logs" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Thermal Printers" %}</h2>
+      <span class="tag">{% trans "80mm" %}</span>
+    </div>
+    <p class="muted">{% trans "Assign printer per branch, test print, paper size and margins." %}</p>
+
+    <div class="mini">
+      <div class="row">
+        <b>{% trans "muscat" %}</b>
+        <span class="muted">{% trans "Not configured" %}</span>
+      </div>
+    </div>
+
+    <div class="mini-actions">
+      <button class="btn btn-outline" type="button" disabled>{% trans "Configure" %}</button>
+      <button class="btn btn-outline" type="button" disabled>{% trans "Test Print" %}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Barcode Setup" %}</h2>
+      <span class="tag">{% trans "Scanner" %}</span>
+    </div>
+    <p class="muted">{% trans "Map barcode → item, auto price from Services/Items (Catalog)." %}</p>
+
+    <div class="mini">
+      <div class="row">
+        <b>S001</b>
+        <span class="muted">{% trans "Shirt" %}</span>
+      </div>
+      <div class="row">
+        <b>K001</b>
+        <span class="muted">{% trans "Kandura" %}</span>
+      </div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-primary" href="{% url 'catalog:home' %}">{% trans "Open Catalog" %}</a>
+      <a class="btn btn-outline" href="/admin/" target="_blank">{% trans "Admin Panel" %}</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

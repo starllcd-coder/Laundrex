@@ -1,0 +1,109 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Add Staff" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Add Staff" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Add Staff" %}</h1>
+    <p class="sub">{% trans "Create employee account, branch assignment and role groups." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'management:staff' %}">{% trans "Back" %}</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "New Employee" %}</h2>
+    </div>
+
+    {% if error %}
+    <p class="muted" style="color:#b42318; font-weight:700;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="pay-form">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Username" %}</label>
+          <input name="username" required />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Email" %}</label>
+          <input name="email" type="email" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Password" %}</label>
+          <input name="password" type="password" required />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Active" %}</label>
+          <select name="is_active">
+            <option value="1" selected>{% trans "Yes" %}</option>
+            <option value="0">{% trans "No" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Branch" %}</label>
+          <select name="branch">
+            <option value="">{% trans "None" %}</option>
+            {% for b in branches %}
+              <option value="{{ b.id }}">{{ b.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field grow">
+          <label>{% trans "Override Branch" %}</label>
+          <select name="can_override_branch">
+            <option value="0" selected>{% trans "No" %}</option>
+            <option value="1">{% trans "Yes" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Preferred Language" %}</label>
+          <select name="preferred_language">
+            <option value="en" selected>{% trans "English" %}</option>
+            <option value="ar">{% trans "Arabic" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Groups (Roles)" %}</label>
+          <div class="check-row">
+            {% for g in groups %}
+              <label class="check-inline">
+                <input type="checkbox" name="groups" value="{{ g.id }}" />
+                {{ g.name }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="submit">{% trans "Create Staff" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

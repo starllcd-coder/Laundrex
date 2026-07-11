@@ -1,0 +1,941 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Reports" %} | {{ active_business_name|default:"Laundrex" }}{% endblock %}
+{% block topbar_title %}{% trans "Reports" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+{% trans "All" as all_label %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Reports" %}</h1>
+    <p class="sub">{% trans "Filter by date range and branch. Print-friendly." %}</p>
+  </div>
+  <div class="actions no-print">
+    <a class="btn btn-outline" href="{% url 'reports:z_report' %}">{% trans "Z Report" %}</a>
+    <a class="btn btn-outline" href="{% url 'reports:export_pdf' %}?{{ request.GET.urlencode }}" download>{% trans "Export PDF" %}</a>
+    <a class="btn btn-outline" href="{% url 'reports:export_excel' %}?{{ request.GET.urlencode }}" download>{% trans "Export Excel" %}</a>
+    <a class="btn btn-outline" href="{% url 'reports:export_csv' %}?{{ request.GET.urlencode }}" download>{% trans "Export CSV" %}</a>
+    <button class="btn btn-outline" type="button" onclick="window.print()">{% trans "Print" %}</button>
+  </div>
+</div>
+
+<div class="print-only print-head">
+  <div class="print-brand-row">
+    {% if active_business_logo_url %}
+    <img class="print-logo" src="{{ active_business_logo_url }}" alt="{{ active_business_name|default:'Laundrex' }}">
+    {% endif %}
+    <div class="print-brand">{{ active_business_name|default:"Laundrex" }}</div>
+  </div>
+  <div class="print-title">{% trans "Reports" %}</div>
+  <div class="print-meta">
+    <span>{% trans "Branch" %}: {{ branch|default:all_label }}</span>
+    <span>{% trans "Start date" %}: {{ start|default:"-" }}</span>
+    <span>{% trans "End date" %}: {{ end|default:"-" }}</span>
+    <span>{% trans "Generated at" %}: {{ generated_at|date:"Y-m-d H:i" }}</span>
+  </div>
+</div>
+
+<form class="filters no-print" method="get">
+  <div class="field">
+    <label>{% trans "Report Type" %}</label>
+    <select name="pack">
+      {% for code, label in pack_choices %}
+      <option value="{{ code }}" {% if selected_pack == code %}selected{% endif %}>
+        {% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}
+          {% if code == "all" %}كل التقارير
+          {% elif code == "sales" %}تقارير المبيعات والإيرادات
+          {% elif code == "operations" %}تقارير الطلبات والعمليات
+          {% elif code == "customers" %}تقارير العملاء
+          {% elif code == "delivery" %}تقارير التوصيل واللوجستيات
+          {% elif code == "expenses" %}تقارير المصاريف والأرباح
+          {% elif code == "staff" %}تقارير أداء الموظفين
+          {% elif code == "quality" %}تقارير المشاكل والجودة
+          {% else %}{{ label }}{% endif %}
+        {% else %}
+          {% if code == "all" %}{% trans "All Reports" %}
+          {% elif code == "sales" %}{% trans "Sales & Revenue Reports" %}
+          {% elif code == "operations" %}{% trans "Orders & Operations Reports" %}
+          {% elif code == "customers" %}{% trans "Customer Reports" %}
+          {% elif code == "delivery" %}{% trans "Delivery & Logistics Reports" %}
+          {% elif code == "expenses" %}{% trans "Expense & Profit Reports" %}
+          {% elif code == "staff" %}{% trans "Staff Performance Reports" %}
+          {% elif code == "quality" %}{% trans "Issue & Quality Reports" %}
+          {% else %}{{ label }}{% endif %}
+        {% endif %}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label>{% trans "Period" %}</label>
+    <select name="period">
+      <option value="custom" {% if period == "custom" %}selected{% endif %}>{% trans "Custom Range" %}</option>
+      <option value="weekly" {% if period == "weekly" %}selected{% endif %}>{% trans "Weekly" %}</option>
+      <option value="monthly" {% if period == "monthly" %}selected{% endif %}>{% trans "Monthly" %}</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>{% trans "Start date" %}</label>
+    <input type="date" name="start" value="{{ start }}">
+  </div>
+
+  <div class="field">
+    <label>{% trans "End date" %}</label>
+    <input type="date" name="end" value="{{ end }}">
+  </div>
+
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat..." %}">
+  </div>
+
+  <div class="field">
+    <label>{% trans "Mode" %}</label>
+    <select name="mode">
+      <option value="" {% if not mode %}selected{% endif %}>{% trans "All" %}</option>
+      <option value="walkin" {% if mode == "walkin" %}selected{% endif %}>{% trans "Walk-in" %}</option>
+      <option value="delivery" {% if mode == "delivery" %}selected{% endif %}>{% trans "Delivery" %}</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+<div class="muted no-print" style="margin-bottom:10px;">
+  {% trans "Selected report type controls CSV/Excel/PDF export content. On-screen dashboard remains comprehensive." %}
+</div>
+
+<div class="print-only print-report-tables">
+  <div class="card report-section" data-pack="sales" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Sales Summary" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Metric" %}</th>
+            <th class="right">{% trans "Value" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>{% trans "Orders" %}</td><td class="right">{{ totals.orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "Revenue" %}</td><td class="right">{{ totals.revenue|default:0|floatformat:3 }}</td></tr>
+          <tr><td>{% trans "Paid" %}</td><td class="right">{{ totals.paid|default:0|floatformat:3 }}</td></tr>
+          <tr><td>{% trans "Amount Due" %}</td><td class="right">{{ totals.balance|default:0|floatformat:3 }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="sales" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Performance" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Metric" %}</th>
+            <th class="right">{% trans "Value" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>{% trans "Daily Revenue" %}</td><td class="right">{{ daily_revenue|default:0|floatformat:3 }}</td></tr>
+          <tr><td>{% trans "Weekly Revenue" %}</td><td class="right">{{ weekly_revenue|default:0|floatformat:3 }}</td></tr>
+          <tr><td>{% trans "Monthly Revenue" %}</td><td class="right">{{ monthly_revenue|default:0|floatformat:3 }}</td></tr>
+          <tr><td>{% trans "Avg Order Value" %}</td><td class="right">{{ avg_order_value|default:0|floatformat:3 }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="operations" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Operational Metrics" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Metric" %}</th>
+            <th class="right">{% trans "Value" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>{% trans "Delayed Orders" %}</td><td class="right">{{ delayed_orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "Pending Deliveries" %}</td><td class="right">{{ pending_deliveries|default:"0" }}</td></tr>
+          <tr><td>{% trans "Unpaid Orders" %}</td><td class="right">{{ unpaid_orders|default:"0" }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="operations" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Orders by Status" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Status" %}</th>
+            <th class="right">{% trans "Count" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in by_status %}
+          <tr>
+            <td>{{ s.label }}</td>
+            <td class="right">{{ s.c }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="sales operations" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Last 7 Days" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Date" %}</th>
+            <th class="right">{% trans "Revenue" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in trend %}
+          <tr>
+            <td>{{ t.date|date:"Y-m-d" }}</td>
+            <td class="right">{{ t.revenue|default:0|floatformat:3 }}</td>
+            <td class="right">{{ t.orders|default:"0" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="operations delivery" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Operations Mix" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Metric" %}</th>
+            <th class="right">{% trans "Value" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>{% trans "Cancelled Orders" %}</td><td class="right">{{ cancelled_orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "Express Orders" %}</td><td class="right">{{ express_orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "Normal Orders" %}</td><td class="right">{{ normal_orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "Pickup Orders" %}</td><td class="right">{{ pickup_orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "Delivery Orders" %}</td><td class="right">{{ delivery_orders|default:"0" }}</td></tr>
+          <tr><td>{% trans "On-time Deliveries" %}</td><td class="right">{{ on_time_deliveries|default:"0" }}</td></tr>
+          <tr><td>{% trans "Late Deliveries" %}</td><td class="right">{{ late_deliveries|default:"0" }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="customers" style="margin-top:10px;">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Customer Insights" %}</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Metric" %}</th>
+            <th class="right">{% trans "Value" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>{% trans "New Customers" %}</td><td class="right">{{ new_customers|default:"0" }}</td></tr>
+          <tr><td>{% trans "Returning Customers" %}</td><td class="right">{{ returning_customers|default:"0" }}</td></tr>
+          <tr><td>{% trans "Retention Rate" %}</td><td class="right">{{ retention_rate|default:0|floatformat:1 }}%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="cards report-section" data-pack="sales">
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Orders" %}</div>
+    <div class="kpi-value">{{ totals.orders|default:"0" }}</div>
+    <div class="kpi-sub">{% trans "Count" %}</div>
+  </div>
+
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Revenue" %}</div>
+    <div class="kpi-value">{{ totals.revenue|default:0|floatformat:3 }}</div>
+    <div class="kpi-sub">{% trans "Total amount" %}</div>
+  </div>
+
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Paid" %}</div>
+    <div class="kpi-value">{{ totals.paid|default:0|floatformat:3 }}</div>
+    <div class="kpi-sub">{% trans "Collected" %}</div>
+  </div>
+
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Amount Due" %}</div>
+    <div class="kpi-value">{{ totals.balance|default:0|floatformat:3 }}</div>
+    <div class="kpi-sub">{% trans "Outstanding" %}</div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="sales" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Performance" %}</h2>
+    <span class="muted">{% trans "Branch-aware summary" %}</span>
+  </div>
+  <div class="cards">
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Daily Revenue" %}</div>
+      <div class="kpi-value">{{ daily_revenue|default:0|floatformat:3 }}</div>
+      <div class="kpi-sub">{% trans "Today" %}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Weekly Revenue" %}</div>
+      <div class="kpi-value">{{ weekly_revenue|default:0|floatformat:3 }}</div>
+      <div class="kpi-sub">{% trans "This week" %}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Monthly Revenue" %}</div>
+      <div class="kpi-value">{{ monthly_revenue|default:0|floatformat:3 }}</div>
+      <div class="kpi-sub">{% trans "This month" %}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Avg Order Value" %}</div>
+      <div class="kpi-value">{{ avg_order_value|default:0|floatformat:3 }}</div>
+      <div class="kpi-sub">{% trans "Per order" %}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="operations" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Operational Metrics" %}</h2>
+    <span class="muted">{% trans "Filtered" %}</span>
+  </div>
+  <div class="cards">
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Delayed Orders" %}</div>
+      <div class="kpi-value">{{ delayed_orders|default:"0" }}</div>
+      <div class="kpi-sub">{% trans "48h+" %}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Pending Deliveries" %}</div>
+      <div class="kpi-value">{{ pending_deliveries|default:"0" }}</div>
+      <div class="kpi-sub">{% trans "Pending / Assigned / Out" %}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Unpaid Orders" %}</div>
+      <div class="kpi-value">{{ unpaid_orders|default:"0" }}</div>
+      <div class="kpi-sub">{% trans "Balance > 0" %}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="sales operations" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Last 7 Days" %}</h2>
+    <span class="muted">{% trans "Revenue and orders" %}</span>
+  </div>
+  <div class="charts">
+    <div class="chart">
+      <div class="chart-title">{% trans "Revenue" %}</div>
+      <div class="chart-bars">
+        {% for t in trend %}
+        <div class="bar">
+          <div class="bar-fill" style="height:{{ t.rev_pct }}%"></div>
+          <div class="bar-label">{{ t.date|date:"D" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="chart">
+      <div class="chart-title">{% trans "Orders" %}</div>
+      <div class="chart-bars">
+        {% for t in trend %}
+        <div class="bar">
+          <div class="bar-fill alt" style="height:{{ t.order_pct }}%"></div>
+          <div class="bar-label">{{ t.date|date:"D" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="sales operations" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Weekly Trend" %}</h2>
+    <span class="muted">{% trans "Last 8 weeks" %}</span>
+  </div>
+  <div class="charts">
+    <div class="chart">
+      <div class="chart-title">{% trans "Revenue" %}</div>
+      <div class="chart-bars">
+        {% for t in weekly_trend %}
+        <div class="bar">
+          <div class="bar-fill" style="height:{{ t.rev_pct }}%"></div>
+          <div class="bar-label">{{ t.start|date:"M d" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="chart">
+      <div class="chart-title">{% trans "Orders" %}</div>
+      <div class="chart-bars">
+        {% for t in weekly_trend %}
+        <div class="bar">
+          <div class="bar-fill alt" style="height:{{ t.order_pct }}%"></div>
+          <div class="bar-label">{{ t.start|date:"M d" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="sales operations" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Monthly Trend" %}</h2>
+    <span class="muted">{% trans "Last 6 months" %}</span>
+  </div>
+  <div class="charts">
+    <div class="chart">
+      <div class="chart-title">{% trans "Revenue" %}</div>
+      <div class="chart-bars">
+        {% for t in monthly_trend %}
+        <div class="bar">
+          <div class="bar-fill" style="height:{{ t.rev_pct }}%"></div>
+          <div class="bar-label">{{ t.start|date:"M" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="chart">
+      <div class="chart-title">{% trans "Orders" %}</div>
+      <div class="chart-bars">
+        {% for t in monthly_trend %}
+        <div class="bar">
+          <div class="bar-fill alt" style="height:{{ t.order_pct }}%"></div>
+          <div class="bar-label">{{ t.start|date:"M" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="operations" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Orders by Status" %}</h2>
+    <span class="muted">{% trans "Filtered" %}</span>
+  </div>
+
+  <div class="status-grid">
+    {% for s in by_status %}
+      <div class="status-box">
+        <div class="muted">{{ s.label }}</div>
+        <div class="big">{{ s.c }}</div>
+      </div>
+    {% empty %}
+      <div class="muted">{% trans "No data." %}</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="grid report-section" data-pack="sales customers" style="margin-top:14px;">
+  <div class="card report-section" data-pack="sales">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Top Services" %}</h2>
+      <span class="muted">{% trans "By revenue" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Service" %}</th>
+            <th class="right">{% trans "Qty" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Revenue" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in top_services %}
+          <tr>
+            <td><b>{{ s.service_name }}</b></td>
+            <td class="right">{{ s.qty|default:"0" }}</td>
+            <td class="right">{{ s.orders|default:"0" }}</td>
+            <td class="right"><b>{{ s.revenue|default:0|floatformat:3 }}</b></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="customers">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Top Customers" %}</h2>
+      <span class="muted">{% trans "By revenue" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Customer" %}</th>
+            <th>{% trans "Phone" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Revenue" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in top_customers %}
+          <tr>
+            <td><b>{{ c.customer__name|default:walk_in_label }}</b></td>
+            <td>{{ c.customer__phone|default:"-" }}</td>
+            <td class="right">{{ c.orders|default:"0" }}</td>
+            <td class="right"><b>{{ c.revenue|default:0|floatformat:3 }}</b></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="operations delivery" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Operations Mix" %}</h2>
+    <span class="muted">{% trans "Filtered" %}</span>
+  </div>
+  <div class="cards">
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Cancelled Orders" %}</div>
+      <div class="kpi-value">{{ cancelled_orders|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Express Orders" %}</div>
+      <div class="kpi-value">{{ express_orders|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Normal Orders" %}</div>
+      <div class="kpi-value">{{ normal_orders|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Pickup Orders" %}</div>
+      <div class="kpi-value">{{ pickup_orders|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Delivery Orders" %}</div>
+      <div class="kpi-value">{{ delivery_orders|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "On-time Deliveries" %}</div>
+      <div class="kpi-value">{{ on_time_deliveries|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Late Deliveries" %}</div>
+      <div class="kpi-value">{{ late_deliveries|default:"0" }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card report-section print-hide-shell" data-pack="customers" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Customer Insights" %}</h2>
+    <span class="muted">{% trans "Filtered" %}</span>
+  </div>
+  <div class="cards">
+    <div class="kpi">
+      <div class="kpi-title">{% trans "New Customers" %}</div>
+      <div class="kpi-value">{{ new_customers|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Returning Customers" %}</div>
+      <div class="kpi-value">{{ returning_customers|default:"0" }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">{% trans "Retention Rate" %}</div>
+      <div class="kpi-value">{{ retention_rate|default:0|floatformat:1 }}%</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid" style="margin-top:14px;">
+  <div class="card report-section" data-pack="sales">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Revenue by Item" %}</h2>
+      <span class="muted">{% trans "Top items" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Item" %}</th>
+            <th class="right">{% trans "Qty" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Revenue" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in revenue_by_item %}
+          <tr>
+            <td><b>{{ row.item_name }}</b></td>
+            <td class="right">{{ row.qty|default:"0" }}</td>
+            <td class="right">{{ row.orders|default:"0" }}</td>
+            <td class="right"><b>{{ row.revenue|default:0|floatformat:3 }}</b></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="customers">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Location-wise Customers" %}</h2>
+      <span class="muted">{% trans "Top locations" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Location" %}</th>
+            <th class="right">{% trans "Customers" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Revenue" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in location_customers %}
+          <tr>
+            <td><b>{{ row.delivery_zone|default:row.customer__address|default:"-" }}</b></td>
+            <td class="right">{{ row.customers|default:"0" }}</td>
+            <td class="right">{{ row.orders|default:"0" }}</td>
+            <td class="right"><b>{{ row.revenue|default:0|floatformat:3 }}</b></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid report-section" data-pack="delivery" style="margin-top:14px;">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Delivery Status Report" %}</h2>
+      <span class="muted">{% trans "Delivery orders only" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Status" %}</th>
+            <th class="right">{% trans "Count" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in delivery_by_status %}
+          <tr>
+            <td><b>{{ row.label }}</b></td>
+            <td class="right">{{ row.c|default:"0" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Driver Performance" %}</h2>
+      <span class="muted">{% trans "Top drivers" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Driver" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Delivered" %}</th>
+            <th class="right">{% trans "Failed" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in driver_performance %}
+          <tr>
+            <td><b>{{ row.delivery_driver_name }}</b></td>
+            <td class="right">{{ row.total_deliveries|default:"0" }}</td>
+            <td class="right">{{ row.delivered|default:"0" }}</td>
+            <td class="right">{{ row.failed|default:"0" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid" style="margin-top:14px;">
+  <div class="card report-section" data-pack="delivery">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Delivery Area Performance" %}</h2>
+      <span class="muted">{% trans "By zone" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Area" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Delivered" %}</th>
+            <th class="right">{% trans "Failed" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in area_performance %}
+          <tr>
+            <td><b>{{ row.delivery_zone }}</b></td>
+            <td class="right">{{ row.orders|default:"0" }}</td>
+            <td class="right">{{ row.delivered|default:"0" }}</td>
+            <td class="right">{{ row.failed|default:"0" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card report-section" data-pack="staff">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Orders Handled per Staff" %}</h2>
+      <span class="muted">{% trans "Cashier activity" %}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Staff" %}</th>
+            <th class="right">{% trans "Orders" %}</th>
+            <th class="right">{% trans "Delivered" %}</th>
+            <th class="right">{% trans "Cancelled" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in staff_performance %}
+          <tr>
+            <td><b>{{ row.cashier__first_name|default:row.cashier__username }} {{ row.cashier__last_name|default:"" }}</b></td>
+            <td class="right">{{ row.orders|default:"0" }}</td>
+            <td class="right">{{ row.delivered|default:"0" }}</td>
+            <td class="right">{{ row.cancelled|default:"0" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="muted">{% trans "No data." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card no-print report-section" data-pack="operations" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Recent Orders (Preview)" %}</h2>
+    <span class="muted">{% trans "Top 30" %}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Order" %}</th>
+          <th>{% trans "Customer" %}</th>
+          <th>{% trans "Branch" %}</th>
+          <th class="right">{% trans "Total" %}</th>
+          <th class="right">{% trans "Paid" %}</th>
+          <th class="right">{% trans "Amount Due" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in recent %}
+        <tr>
+          <td><b>#{{ o.order_no }}</b><div class="muted">{{ o.created_at }}</div></td>
+          <td><b>{{ o.customer.name|default:walk_in_label }}</b><div class="muted">{{ o.customer.phone|default:"" }}</div></td>
+          <td>{{ o.branch }}</td>
+          <td class="right"><b>{{ o.total }}</b></td>
+          <td class="right">{{ o.paid }}</td>
+          <td class="right"><b>{{ o.balance }}</b></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="muted">{% trans "No recent orders." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if selected_pack == "expenses" or selected_pack == "quality" %}
+<div class="card report-section" data-pack="expenses quality" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">
+      {% if selected_pack == "quality" %}{% trans "Issue & Quality Reports" %}{% else %}{% trans "Expense & Profit Reports" %}{% endif %}
+    </h2>
+    <span class="muted">{% trans "Filtered" %}</span>
+  </div>
+  <div class="muted">{% trans "Not available yet. Requires dedicated data tracking models." %}</div>
+</div>
+{% endif %}
+
+<div class="print-only print-foot">
+  <span>{{ active_business_name|default:"Laundrex" }} - {% trans "Reports" %}</span>
+  <span>{% trans "Generated at" %}: {{ generated_at|date:"Y-m-d H:i" }}</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const selectedPack = "{{ selected_pack|default:'all' }}";
+    const sections = document.querySelectorAll(".report-section[data-pack]");
+    sections.forEach((el) => {
+      if (selectedPack === "all") {
+        el.style.display = "";
+        return;
+      }
+      const packs = (el.getAttribute("data-pack") || "").split(/\s+/).filter(Boolean);
+      el.style.display = packs.includes(selectedPack) ? "" : "none";
+    });
+  })();
+
+  {% if LANGUAGE_CODE == 'ar' or LANGUAGE_CODE|slice:":2" == "ar" %}
+  (function () {
+    const map = {
+      "Export PDF": "تصدير PDF",
+      "Export Excel": "تصدير Excel",
+      "Export CSV": "تصدير CSV",
+      "Report Type": "نوع التقرير",
+      "Sales Summary": "ملخص المبيعات",
+      "Metric": "المؤشر",
+      "Value": "القيمة",
+      "Period": "الفترة",
+      "Custom Range": "فترة مخصصة",
+      "Weekly": "أسبوعي",
+      "Monthly": "شهري",
+      "Customer Reports": "تقارير العملاء",
+      "Performance": "الأداء",
+      "Branch-aware summary": "ملخص حسب الفرع",
+      "Operational Metrics": "مؤشرات التشغيل",
+      "Unpaid Orders": "الطلبات غير المدفوعة",
+      "Pending Deliveries": "عمليات التوصيل المعلقة",
+      "Delayed Orders": "الطلبات المتأخرة",
+      "Balance > 0": "الرصيد > 0",
+      "Pending / Assigned / Out": "معلق / مُسند / خارج للتوصيل",
+      "Last 7 Days": "آخر 7 أيام",
+      "Revenue and orders": "الإيرادات والطلبات",
+      "Weekly Trend": "الاتجاه الأسبوعي",
+      "Last 8 weeks": "آخر 8 أسابيع",
+      "Monthly Trend": "الاتجاه الشهري",
+      "Last 6 months": "آخر 6 أشهر",
+      "Top Customers": "أفضل العملاء",
+      "Top Services": "أفضل الخدمات",
+      "By revenue": "حسب الإيراد",
+      "Operations Mix": "مزيج العمليات",
+      "Pickup Orders": "طلبات الاستلام",
+      "Normal Orders": "الطلبات العادية",
+      "Express Orders": "الطلبات المستعجلة",
+      "Cancelled Orders": "الطلبات الملغاة",
+      "Late Deliveries": "توصيلات متأخرة",
+      "On-time Deliveries": "توصيلات في الوقت",
+      "Delivery Orders": "طلبات التوصيل",
+      "Customer Insights": "تحليلات العملاء",
+      "Retention Rate": "معدل الاحتفاظ",
+      "Returning Customers": "عملاء عائدون",
+      "New Customers": "عملاء جدد",
+      "Location-wise Customers": "العملاء حسب الموقع",
+      "Top locations": "أفضل المواقع",
+      "Revenue by Item": "الإيراد حسب الصنف",
+      "Top items": "أفضل الأصناف",
+      "Driver Performance": "أداء السائقين",
+      "Delivery Status Report": "تقرير حالة التوصيل",
+      "Delivery orders only": "طلبات التوصيل فقط",
+      "Orders Handled per Staff": "الطلبات المنجزة لكل موظف",
+      "Cashier activity": "نشاط الكاشير",
+      "Delivery Area Performance": "أداء مناطق التوصيل",
+      "By zone": "حسب المنطقة",
+      "Area": "المنطقة",
+      "Not available yet. Requires dedicated data tracking models.": "غير متاح حالياً. يتطلب نماذج بيانات مخصصة للتتبع.",
+      "Selected report type controls CSV/Excel/PDF export content. On-screen dashboard remains comprehensive.": "نوع التقرير المحدد يحدد محتوى التصدير CSV/Excel/PDF. لوحة العرض على الشاشة تبقى شاملة.",
+      "Wash": "غسيل",
+      "Shirt": "قميص",
+      "Pant": "بنطلون"
+    };
+
+    const orderedPairs = Object.entries(map).sort((a, b) => b[0].length - a[0].length);
+
+    function replaceTextNode(node) {
+      let text = node.nodeValue;
+      for (const [en, ar] of orderedPairs) {
+        if (text.includes(en)) text = text.split(en).join(ar);
+      }
+      node.nodeValue = text;
+    }
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(replaceTextNode);
+  })();
+  {% endif %}
+
+  if ({{ auto_print|yesno:"true,false" }}) {
+    window.addEventListener('load', function () {
+      setTimeout(function(){ window.print(); }, 120);
+    });
+  }
+</script>
+{% endblock %}

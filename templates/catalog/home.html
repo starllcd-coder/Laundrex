@@ -1,0 +1,107 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% if LANGUAGE_CODE == "ar" %}الكتالوج{% else %}{% trans "Catalog" %}{% endif %} | Laundrex{% endblock %}
+{% block topbar_title %}{% if LANGUAGE_CODE == "ar" %}الكتالوج (الأصناف والتسعير){% else %}{% trans "Catalog (Items & Pricing)" %}{% endif %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% if LANGUAGE_CODE == "ar" %}الأصناف والخدمات والأسعار والباركود{% else %}{% trans "Items, Services, Prices & Barcodes" %}{% endif %}</h1>
+    <p class="sub">{% if LANGUAGE_CODE == "ar" %}البيانات الأساسية للتسعير التلقائي في نقطة البيع ومسح الباركود.{% else %}{% trans "Master data for POS auto-pricing and barcode scanning." %}{% endif %}</p>
+  </div>
+  <div class="actions">
+    <form method="post" action="{% url 'catalog:seed' %}">
+      {% csrf_token %}
+      <button class="btn btn-primary" type="submit">{% if LANGUAGE_CODE == "ar" %}تعبئة البيانات الافتراضية{% else %}{% trans "Seed Defaults" %}{% endif %}</button>
+    </form>
+    <a class="btn btn-outline" href="/admin/" target="_blank">{% if LANGUAGE_CODE == "ar" %}فتح لوحة الإدارة{% else %}{% trans "Open Admin" %}{% endif %}</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% if LANGUAGE_CODE == "ar" %}الخدمات{% else %}{% trans "Services" %}{% endif %}</h2>
+      <span class="muted">{% if LANGUAGE_CODE == "ar" %}التعديل من لوحة الإدارة{% else %}{% trans "Edit in Admin" %}{% endif %}</span>
+    </div>
+    <div class="list">
+      {% for s in services %}
+        <div class="row">
+          <b>{% if LANGUAGE_CODE == "ar" and s.name_ar %}{{ s.name_ar }}{% else %}{{ s.name }}{% endif %}</b>
+          <span class="muted">{{ s.code }}</span>
+        </div>
+      {% empty %}
+        <div class="muted">{% if LANGUAGE_CODE == "ar" %}لا توجد خدمات بعد. اضغط تعبئة البيانات الافتراضية.{% else %}{% trans "No services yet. Click Seed Defaults." %}{% endif %}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% if LANGUAGE_CODE == "ar" %}الأصناف{% else %}{% trans "Items" %}{% endif %}</h2>
+      <span class="muted">{% if LANGUAGE_CODE == "ar" %}التعديل من لوحة الإدارة{% else %}{% trans "Edit in Admin" %}{% endif %}</span>
+    </div>
+    <div class="list">
+      {% for i in items %}
+        <div class="row">
+          <b>{% if LANGUAGE_CODE == "ar" and i.name_ar %}{{ i.name_ar }}{% else %}{{ i.name }}{% endif %}</b>
+          <span class="muted">{% if i.is_active %}{% if LANGUAGE_CODE == "ar" %}نشط{% else %}{% trans "Active" %}{% endif %}{% else %}{% if LANGUAGE_CODE == "ar" %}غير مفعّل{% else %}{% trans "Disabled" %}{% endif %}{% endif %}</span>
+        </div>
+      {% empty %}
+        <div class="muted">{% if LANGUAGE_CODE == "ar" %}لا توجد أصناف بعد. اضغط تعبئة البيانات الافتراضية.{% else %}{% trans "No items yet. Click Seed Defaults." %}{% endif %}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% if LANGUAGE_CODE == "ar" %}الأسعار (الصنف × الخدمة){% else %}{% trans "Prices (Item × Service)" %}{% endif %}</h2>
+    <span class="muted">{% if LANGUAGE_CODE == "ar" %}التعديل من لوحة الإدارة{% else %}{% trans "Edit in Admin" %}{% endif %}</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{% if LANGUAGE_CODE == "ar" %}الصنف{% else %}{% trans "Item" %}{% endif %}</th><th>{% if LANGUAGE_CODE == "ar" %}الخدمة{% else %}{% trans "Service" %}{% endif %}</th><th class="right">{% if LANGUAGE_CODE == "ar" %}السعر{% else %}{% trans "Price" %}{% endif %}</th></tr></thead>
+      <tbody>
+        {% for p in prices %}
+          <tr>
+            <td><b>{% if LANGUAGE_CODE == "ar" and p.item.name_ar %}{{ p.item.name_ar }}{% else %}{{ p.item.name }}{% endif %}</b></td>
+            <td>{% if LANGUAGE_CODE == "ar" and p.service.name_ar %}{{ p.service.name_ar }}{% else %}{{ p.service.name }}{% endif %}</td>
+            <td class="right"><b>{{ p.price }}</b></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="muted">{% if LANGUAGE_CODE == "ar" %}لا توجد أسعار بعد.{% else %}{% trans "No prices yet." %}{% endif %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% if LANGUAGE_CODE == "ar" %}ربط الباركود{% else %}{% trans "Barcode Mapping" %}{% endif %}</h2>
+    <span class="muted">{% if LANGUAGE_CODE == "ar" %}التعديل من لوحة الإدارة{% else %}{% trans "Edit in Admin" %}{% endif %}</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>{% if LANGUAGE_CODE == "ar" %}الباركود{% else %}{% trans "Barcode" %}{% endif %}</th><th>{% if LANGUAGE_CODE == "ar" %}الصنف{% else %}{% trans "Item" %}{% endif %}</th><th>{% if LANGUAGE_CODE == "ar" %}الحالة{% else %}{% trans "Status" %}{% endif %}</th></tr></thead>
+      <tbody>
+        {% for b in barcodes %}
+          <tr>
+            <td><b>{{ b.barcode }}</b></td>
+            <td>{% if LANGUAGE_CODE == "ar" and b.item.name_ar %}{{ b.item.name_ar }}{% else %}{{ b.item.name }}{% endif %}</td>
+            <td>{% if b.is_active %}{% if LANGUAGE_CODE == "ar" %}نشط{% else %}{% trans "Active" %}{% endif %}{% else %}{% if LANGUAGE_CODE == "ar" %}غير مفعّل{% else %}{% trans "Disabled" %}{% endif %}{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="muted">{% if LANGUAGE_CODE == "ar" %}لا توجد باركودات بعد.{% else %}{% trans "No barcodes yet." %}{% endif %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

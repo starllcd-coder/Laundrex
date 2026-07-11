@@ -1,0 +1,226 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Dashboard" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Dashboard" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <h1 class="dash-title">{% trans "Overview" %}</h1>
+    <p class="dash-sub">{% trans "Branch" %}: <b>{{ stats.branch }}</b> - {{ stats.date }}</p>
+  </div>
+
+  <div class="dash-actions">
+    <a class="btn btn-outline" href="{% url 'orders:list' %}">{% trans "View Orders" %}</a>
+    <a class="btn btn-primary" href="{% url 'pos:new_order' %}">{% trans "New Order" %}</a>
+  </div>
+</div>
+
+<div class="grid kpis">
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Today Orders" %}</span>
+      <span class="kpi-badge">{% trans "Live" %}</span>
+    </div>
+    <div class="kpi-value">{{ stats.today_orders }}</div>
+    <div class="kpi-hint">{% trans "Orders created today" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Pending Orders" %}</span>
+      <span class="kpi-dot warning"></span>
+    </div>
+    <div class="kpi-value">{{ stats.pending_orders }}</div>
+    <div class="kpi-hint">{% trans "Not yet completed" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Ready for Pickup" %}</span>
+      <span class="kpi-dot success"></span>
+    </div>
+    <div class="kpi-value">{{ stats.ready_orders }}</div>
+    <div class="kpi-hint">{% trans "Ready to deliver" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Today Revenue" %}</span>
+      <span class="kpi-chip">OMR</span>
+    </div>
+    <div class="kpi-value">{{ stats.today_sales }}</div>
+    <div class="kpi-hint">{% trans "Orders total created today" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Collected Today" %}</span>
+      <span class="kpi-chip">OMR</span>
+    </div>
+    <div class="kpi-value">{{ stats.collected_today }}</div>
+    <div class="kpi-hint">{% trans "Payments received today" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Avg Ticket Today" %}</span>
+      <span class="kpi-chip">OMR</span>
+    </div>
+    <div class="kpi-value">{{ stats.avg_ticket_today }}</div>
+    <div class="kpi-hint">{% trans "Average order value today" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Delivery Due Today" %}</span>
+      <span class="kpi-dot warning"></span>
+    </div>
+    <div class="kpi-value">{{ stats.delivery_due_today }}</div>
+    <div class="kpi-hint">{% trans "Open delivery orders" %}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="kpi-top">
+      <span class="kpi-label">{% trans "Unpaid Orders" %}</span>
+      <span class="kpi-dot warning"></span>
+    </div>
+    <div class="kpi-value">{{ stats.unpaid_orders }}</div>
+    <div class="kpi-hint">{% trans "Balance greater than zero" %}</div>
+  </div>
+</div>
+
+<div class="grid two-col">
+  <div class="left-stack">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Orders by Status" %}</h2>
+        <a class="link" href="{% url 'orders:list' %}">{% trans "Open board" %}</a>
+      </div>
+
+      <div class="status-grid">
+        {% for s in status %}
+        <div class="status-card">
+          <div class="status-label">{{ s.label }}</div>
+          <div class="status-count">{{ s.count }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}مزيج الخدمات{% else %}{% trans "Service Mix" %}{% endif %}</h2>
+        <span class="muted">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}حسب القطع اليوم{% else %}{% trans "By pieces today" %}{% endif %}</span>
+      </div>
+      <div class="insight-card service-mix-standalone">
+        <div class="mix-layout">
+          <div class="mix-donut" style="background: {{ service_mix_gradient }};">
+            <span>{{ service_mix|length }}</span>
+          </div>
+          <div class="mix-list">
+            {% for row in service_mix %}
+            <div class="mix-row">
+              <span class="mix-dot" style="background: {{ row.color }};"></span>
+              <span class="mix-name">{{ row.name }}</span>
+              <span class="mix-qty">{{ row.qty }}</span>
+              <span class="mix-pct">{{ row.pct }}%</span>
+            </div>
+              {% empty %}
+              <div class="mix-empty">
+                <div class="mix-empty-title">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}لا توجد بيانات خدمات بعد{% else %}{% trans "No service data yet" %}{% endif %}</div>
+                <div class="mix-empty-sub">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}ستظهر العناصر المباعة اليوم هنا.{% else %}{% trans "Items sold today will appear here." %}{% endif %}</div>
+              </div>
+              {% endfor %}
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card insights-shell">
+      <div class="card-head">
+        <h2 class="card-title">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}اتجاه الساعات{% else %}{% trans "Hourly Trend" %}{% endif %}</h2>
+        <span class="muted">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}آخر 8 ساعات{% else %}{% trans "Last 8 hours" %}{% endif %}</span>
+      </div>
+
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="hour-bars">
+            {% for slot in hour_slots %}
+            <div class="hour-col">
+              <div class="hour-bar-wrap">
+                <div class="hour-bar" style="height: {{ slot.bar_pct }}%;"></div>
+              </div>
+              <div class="hour-meta">{{ slot.orders }}</div>
+              <div class="hour-label {% if not forloop.counter0|divisibleby:2 %}muted-tick{% endif %}">{{ slot.label }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}قائمة أعمار الطلبات{% else %}{% trans "Aging Queue" %}{% endif %}</h2>
+        <span class="muted">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}الطلبات المفتوحة حسب العمر{% else %}{% trans "Open orders by age" %}{% endif %}</span>
+      </div>
+      <div class="insight-card aging-standalone">
+        <div class="aging-total">{{ aging_total }}</div>
+        <div class="aging-list">
+          {% for row in aging_data %}
+          <div class="aging-row">
+            <span class="aging-label">{{ row.label }}</span>
+            <div class="aging-bar-wrap">
+              <div class="aging-bar aging-{{ row.tone }}" style="width: {{ row.pct }}%;"></div>
+            </div>
+            <span class="aging-count">{{ row.count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card recent-activity-card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Recent Activity" %}</h2>
+      <span class="muted">{% trans "Last 10 actions" %}</span>
+    </div>
+
+    <div class="list">
+      {% for a in recent_activity %}
+      <div class="list-item">
+        {% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}
+          <span class="pill">{{ a.ts|timesince }}</span>
+          <div class="list-item-main">
+            <div class="li-title">{{ a.title }}</div>
+            <div class="li-sub">{{ a.sub }}</div>
+          </div>
+        {% else %}
+          <div class="list-item-main">
+            <div class="li-title">{{ a.title }}</div>
+            <div class="li-sub">{{ a.sub }}</div>
+          </div>
+          <span class="pill">{{ a.ts|timesince }}</span>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="list-item">
+        <div>
+          <div class="li-title">{% trans "No activity yet" %}</div>
+          <div class="li-sub">{% trans "Create an order or receive a payment to see live updates." %}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

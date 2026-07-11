@@ -1,0 +1,32 @@
+Build & Dist
+
+python -m PyInstaller --noconfirm --clean --windowed --name LaundrexDesktop --icon static\assets\favicon.ico --collect-submodules rest_framework --collect-submodules rest_framework_simplejwt --collect-submodules corsheaders --collect-submodules dotenv --collect-submodules apps desktop_app\run_desktop.py
+
+INNO setup command 
+
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "C:\Users\LENOVO\Desktop\Laundrex_Final\laundrex\installer\LaundrexDesktop.iss"
+
+
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Do you want to change the execution policy?
+Y
+cd C:\Users\LENOVO\Desktop\laundrex
+.venv\Scripts\activate
+(.venv) PS C:\Users\LENOVO\Desktop\laundrex>
+
+
+pip install django python-dotenv psycopg[binary]
+python manage.py migrate
+python manage.py createsuperuser
+
+
+python manage.py runserver
+
+
+http://127.0.0.1:8000/accounts/login/
+
+
+cd C:\Users\LENOVO\Desktop\laundrex\laundrex_mobile_app\flutter_app
+flutter run -d chrome
+

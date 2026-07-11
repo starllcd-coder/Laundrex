@@ -1,0 +1,41 @@
+from django.urls import path
+from . import views
+
+app_name = "orders"
+
+urlpatterns = [
+    path("", views.order_list, name="list"),
+    path("kanban/", views.order_kanban, name="kanban"),
+    path("pickup/", views.pickup_counter, name="pickup"),
+    path("delivery/", views.delivery_list, name="delivery_list"),
+    path("delivery/export.csv", views.delivery_export_csv, name="delivery_export_csv"),
+    path("delivery/route/", views.delivery_route_link, name="delivery_route_link"),
+    path("delivery/board/", views.delivery_board, name="delivery_board"),
+    path("delivery/calendar/", views.delivery_calendar, name="delivery_calendar"),
+    path("delivery/week/", views.delivery_week, name="delivery_week"),
+    path("delivery/<str:order_no>/", views.delivery_detail, name="delivery_detail"),
+    path("delivery/<str:order_no>/quick-update/", views.delivery_quick_update, name="delivery_quick_update"),
+    path("delivery/<str:order_no>/slot-update/", views.delivery_slot_update, name="delivery_slot_update"),
+    path("whatsapp/<str:order_no>/send/", views.whatsapp_send, name="whatsapp_send"),
+    path("whatsapp/log/<int:log_id>/retry/", views.whatsapp_retry, name="whatsapp_retry"),
+    path("customers/", views.customer_list, name="customers"),
+    path("customers/<int:customer_id>/", views.customer_detail, name="customer_detail"),
+    path("api/customer-lookup/", views.customer_lookup, name="customer_lookup"),
+    path("api/customer-get/", views.customer_get, name="customer_get"),
+    path("api/customer-search/", views.customer_search, name="customer_search"),
+    path("api/customer-last-order/", views.customer_last_order, name="customer_last_order"),
+    path("api/customer-duplicate-check/", views.customer_duplicate_check, name="customer_duplicate_check"),
+    path("api/live-check/", views.live_order_check, name="live_check"),
+    path("api/live-debug/", views.live_order_debug, name="live_debug"),
+    path("sync/push/", views.sync_push, name="sync_push"),
+    path("sync/pull/", views.sync_pull, name="sync_pull"),
+    path("central/webhook/", views.central_order_webhook, name="central_order_webhook"),
+    path("<str:order_no>/", views.order_detail, name="detail"),
+    path("<str:order_no>/advance/", views.order_advance_status, name="advance"),
+    path("<str:order_no>/set-status/", views.order_set_status, name="set_status"),
+    path("<str:order_no>/mark-collected/", views.order_mark_collected, name="mark_collected"),
+    path("<str:order_no>/undo-status/", views.order_undo_last_status, name="undo_status"),
+    path("<str:order_no>/set-urgent/", views.order_set_urgent, name="set_urgent"),
+    path("<str:order_no>/pickup/", views.order_pickup_update, name="pickup_update"),
+    path("<str:order_no>/cancel/", views.order_cancel, name="cancel"),
+]

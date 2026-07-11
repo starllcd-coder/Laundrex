@@ -1,0 +1,186 @@
+@import url("/static/css/orders.css");
+
+.head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:16px; }
+.actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.h1{ margin:0; font-size:34px; letter-spacing:-.5px; color:#1B2A44; }
+.sub{ margin:6px 0 0; color:#64748B; font-weight:600; }
+
+.cards{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap:14px;
+}
+.kpi{
+  background:#fff;
+  border:1px solid #E7EEF7;
+  border-radius:16px;
+  box-shadow:0 12px 26px rgba(2,24,74,.08);
+  padding:16px;
+}
+.kpi-title{ color:#64748B; font-weight:900; font-size:12px; }
+.kpi-value{ font-size:32px; font-weight:1000; color:#0B2A52; margin-top:6px; }
+.kpi-sub{ color:#64748B; font-weight:700; font-size:13px; margin-top:2px; }
+
+.status-grid{
+  display:grid;
+  grid-template-columns: repeat(6, minmax(160px, 1fr));
+  gap:12px;
+}
+.status-box{
+  border:1px solid #E7EEF7;
+  border-radius:14px;
+  padding:12px;
+  background:linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1));
+}
+.big{ font-size:26px; font-weight:1000; color:#0B2A52; margin-top:6px; }
+
+.charts{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+.chart{ background:#fff; border:1px solid #E7EEF7; border-radius:14px; padding:12px; }
+.chart-title{ font-weight:900; color:#0B2A52; margin-bottom:10px; }
+.chart-bars{ display:flex; gap:8px; align-items:flex-end; height:140px; }
+.bar{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+.bar-fill{ width:100%; background:linear-gradient(180deg, #1E6CCB, #0B2A52); border-radius:8px 8px 4px 4px; min-height:6px; }
+.bar-fill.alt{ background:linear-gradient(180deg, #19B6B6, #0E7490); }
+.bar-label{ font-size:11px; font-weight:900; color:#475569; }
+
+.print-only{ display:none; }
+
+@media (max-width:1100px){
+  .cards{ grid-template-columns: 1fr 1fr; }
+  .status-grid{ grid-template-columns: 1fr 1fr; }
+  .charts{ grid-template-columns: 1fr; }
+}
+
+/* ✅ Print mode */
+@media print{
+  .no-print{ display:none !important; }
+
+  /* Hide app shell chrome (topbar + sidebar) when printing reports */
+  .topbar,
+  .sidebar{
+    display:none !important;
+  }
+
+  .app-body{
+    display:block !important;
+    grid-template-columns: 1fr !important;
+    min-height:auto !important;
+  }
+
+  .content{
+    padding:0 !important;
+    margin:0 !important;
+  }
+
+  .head{
+    margin-bottom:10px !important;
+  }
+
+  .print-only{
+    display:block !important;
+  }
+
+  .print-head{
+    border-bottom:1px solid #cbd5e1;
+    margin-bottom:10px;
+    padding-bottom:8px;
+  }
+
+  .print-brand-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .print-logo{
+    width:26px;
+    height:26px;
+    object-fit:contain;
+  }
+
+  .print-brand{
+    font-weight:900;
+    font-size:16px;
+    color:#0b2a52;
+  }
+
+  .print-title{
+    font-weight:800;
+    font-size:18px;
+    margin-top:2px;
+  }
+
+  .print-meta{
+    margin-top:4px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    font-size:11px;
+    color:#334155;
+  }
+
+  .print-foot{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    border-top:1px solid #cbd5e1;
+    padding-top:6px;
+    font-size:10px;
+    color:#475569;
+    display:flex !important;
+    justify-content:space-between;
+  }
+
+  body{
+    background:#fff !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  .kpi,
+  .card{
+    box-shadow:none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cards,
+  .status-grid,
+  .charts{
+    display:none !important;
+  }
+
+  .print-hide-shell{
+    display:none !important;
+  }
+
+  .print-report-tables .card{
+    margin-top:8px !important;
+  }
+
+  .print-report-tables .table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:11px;
+  }
+
+  .print-report-tables .table th,
+  .print-report-tables .table td{
+    border:1px solid #cbd5e1;
+    padding:4px 6px;
+  }
+
+  .print-report-tables .table th{
+    background:#f8fafc;
+  }
+
+  .right{
+    text-align:right;
+  }
+
+  @page{
+    size: A4 portrait;
+    margin: 10mm;
+  }
+}

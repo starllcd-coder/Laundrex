@@ -1,0 +1,1240 @@
+﻿{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "POS" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "POS - New Order" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/pos.css' %}">
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+<div class="pos-header">
+  <div>
+    <h1 class="pos-title">{% trans "New Order" %}</h1>
+    <p class="pos-sub" id="posSub">{% trans "Fast checkout • Barcode ready • Thermal print" %}</p>
+  </div>
+
+  <div class="pos-actions">
+    <button class="btn btn-outline" type="button" id="clearBtn">{% trans "Clear" %}</button>
+    <button class="btn btn-primary" type="button" id="saveBtn">{% trans "Save Order" %}</button>
+    <button class="btn btn-primary" type="button" id="printBtn">{% trans "Save & Print" %}</button>
+    <button class="btn btn-outline" type="button" id="syncBtn">{% if LANGUAGE_CODE == "ar" or LANGUAGE_CODE|slice:":2" == "ar" %}مزامنة دون اتصال{% else %}{% trans "Sync Offline" %}{% endif %} (<span id="offlineCount">0</span>)</button>
+  </div>
+</div>
+
+<div class="pos-grid">
+  <!-- LEFT -->
+  <section class="stack">
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Customer" %}</h2>
+        <span class="muted">{% trans "Search by phone or name" %}</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>{% trans "Phone" %}</label>
+          <div class="typeahead">
+            <input id="custPhone" type="text" placeholder="{% trans "+968 ..." %}" autocomplete="off" />
+            <div class="typeahead-list" id="custSuggest" hidden></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>{% trans "Name" %}</label>
+          <input id="custName" type="text" placeholder="{% trans "Customer name" %}" />
+        </div>
+        <div class="field">
+          <label>{% trans "VIP" %}</label>
+          <select id="custVip">
+            <option value="no" selected>{% trans "No" %}</option>
+            <option value="yes">{% trans "Yes" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="loyalty-row">
+        <div class="points-pill">{% trans "Points" %}: <b id="custPoints">0</b></div>
+        <label class="check-inline">
+          <input type="checkbox" id="applyVip" />
+          {% trans "Apply VIP discount" %}
+        </label>
+        <span class="muted" id="vipRateText"></span>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-outline" type="button" id="findCustomerBtn">{% trans "Find" %}</button>
+        <button class="btn btn-outline" type="button" id="newCustomerBtn">{% trans "New Customer" %}</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Add Items" %}</h2>
+        <span class="muted">{% trans "Scan barcode or choose item" %}</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Barcode" %}</label>
+          <input id="barcode" type="text" placeholder="{% trans "Scan barcode here..." %}" />
+        </div>
+
+        <div class="field grow">
+          <label>{% trans "Item" %}</label>
+          <select id="itemSelect">
+            <option value="" selected disabled>{% trans "Loading items..." %}</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>{% trans "Service" %}</label>
+          <select id="serviceSelect"></select>
+        </div>
+
+        <div class="field">
+          <label>{% trans "Qty" %}</label>
+          <input id="qty" type="number" value="1" min="1" />
+        </div>
+
+        <div class="field">
+          <label>{% trans "Price (OMR)" %}</label>
+          <input id="price" type="number" value="0.000" step="0.001" />
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="button" id="addBtn">{% trans "Add to Order" %}</button>
+      </div>
+
+      <div class="quick-wrap">
+        <div class="quick-head">
+          <span id="quickAddLabel">{% trans "Quick Add" %}</span>
+          <span class="muted" id="quickShortcutLabel">{% trans "Shortcuts: Alt+F phone, Alt+B barcode, Alt+A add, Alt+S save, Alt+P print" %}</span>
+        </div>
+        <div class="quick-row" id="quickServices"></div>
+        <div class="quick-row" id="quickCombos"></div>
+        <div class="quick-row" id="quickPopular"></div>
+        <div class="quick-row" id="quickLast"></div>
+        <div class="quick-actions">
+          <button class="btn btn-outline" type="button" id="repeatLastBtn" disabled>{% trans "Repeat Last Order" %}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Order Items" %}</h2>
+        <span class="muted"><span id="itemCount">0</span> {% trans "items" %}</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" id="itemsTable">
+          <thead>
+            <tr>
+              <th>{% trans "Item" %}</th>
+              <th>{% trans "Service" %}</th>
+              <th class="right">{% trans "Qty" %}</th>
+              <th class="right">{% trans "Price" %}</th>
+              <th class="right">{% trans "Total" %}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="stack">
+
+    <div class="card summary">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Summary" %}</h2>
+        <span class="pill">{% trans "Branch" %}: {{ request.session.active_branch|default:"-" }}</span>
+      </div>
+
+      <div class="sum-row">
+        <span>{% trans "Subtotal" %}</span>
+        <b id="subtotal">0.000</b>
+      </div>
+
+      <div class="sum-row">
+        <span>{% trans "Discount" %}</span>
+        <div class="sum-inline">
+          <input id="discount" type="number" value="0" min="0" step="0.001" />
+          <span class="unit">OMR</span>
+        </div>
+      </div>
+
+      <div class="sum-row">
+        <span>{% trans "Redeem Points" %}</span>
+        <div class="sum-inline">
+          <input id="redeemPoints" type="number" value="0" min="0" step="1" />
+          <span class="unit">pts</span>
+          <span class="muted" id="redeemValue">0.000 OMR</span>
+        </div>
+      </div>
+
+      <div class="sum-row">
+        <span>{% trans "Tax" %}</span>
+        <div class="sum-inline">
+          <input id="tax" type="number" value="0" min="0" step="0.001" />
+          <span class="unit">OMR</span>
+        </div>
+      </div>
+
+      <div class="sum-total">
+        <span>{% trans "Total" %}</span>
+        <b id="grandTotal">0.000</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Payment" context "payment_section" %}</h2>
+        <span class="muted">{% trans "Choose method" %}</span>
+      </div>
+
+      <div class="pay-grid">
+        <button class="pay-btn active" type="button" data-pay="cash">{% trans "Cash" %}</button>
+        <button class="pay-btn" type="button" data-pay="card">{% trans "Card" %}</button>
+        <button class="pay-btn" type="button" data-pay="wallet">{% trans "Wallet" %}</button>
+        <button class="pay-btn" type="button" data-pay="bank">{% trans "Bank Transfer" %}</button>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Paid (OMR)" %}</label>
+          <input id="paid" type="number" value="0" step="0.001" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Amount Due" %}</label>
+          <input id="balance" type="text" value="0.000" readonly />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>{% trans "Notes" %}</label>
+        <input id="notes" type="text" placeholder="{% trans "Special instructions..." %}" />
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-outline" type="button" id="holdBtn">{% trans "Hold" %}</button>
+        <button class="btn btn-primary" type="button" id="completeBtn">{% trans "Complete Order" %}</button>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script>
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("{% static 'js/pos-sw.js' %}").catch(() => {});
+    });
+  }
+
+  const I18N = {
+    catalogApiError: "{% trans "Catalog API error" %}",
+    defaultService: "{% trans "Wash" %}",
+    selectItem: "{% trans "Select item" %}",
+    pleaseSelectItem: "{% trans "Please select an item" %}",
+    vipLabel: "{% trans "VIP" %}",
+    zeroQtyWarning: "{% trans "Quantity must be at least 1" %}",
+    negativePriceWarning: "{% trans "Price cannot be negative" %}",
+    priceAnomalyWarning: "{% trans "Price differs from catalog. Continue?" %}",
+    missingPhoneWarning: "{% trans "Customer phone is empty. Continue as walk-in?" %}",
+    duplicateOrderWarning: "{% trans "A recent order exists for this phone. Continue?" %}",
+    lastOrderMissing: "{% trans "No previous order found" %}",
+    replaceItemsConfirm: "{% trans "Replace current items with last order?" %}"
+  };
+
+  // -----------------------------
+  // State
+  // -----------------------------
+  const items = [];
+  let CATALOG = { services:[], items:[], barcode_map:{}, price_map:{} };
+  const IS_AR = "{{ LANGUAGE_CODE }}".toLowerCase().startsWith("ar");
+  let currentCustomer = null;
+  let lastOrder = null;
+
+  // -----------------------------
+  // DOM
+  // -----------------------------
+  const tbody = document.querySelector("#itemsTable tbody");
+
+  const barcodeInput = document.getElementById("barcode");
+  const itemSelect = document.getElementById("itemSelect");
+  const serviceSelect = document.getElementById("serviceSelect");
+  const qtyInput = document.getElementById("qty");
+  const priceInput = document.getElementById("price");
+  const quickServices = document.getElementById("quickServices");
+  const quickCombos = document.getElementById("quickCombos");
+  const quickPopular = document.getElementById("quickPopular");
+  const quickLast = document.getElementById("quickLast");
+  const repeatLastBtn = document.getElementById("repeatLastBtn");
+  const findCustomerBtn = document.getElementById("findCustomerBtn");
+  const newCustomerBtn = document.getElementById("newCustomerBtn");
+  const itemDisplayName = (i) => (IS_AR ? (i.name_ar || i.name || "") : (i.name || i.name_ar || ""));
+  const serviceDisplayName = (s) => {
+    if (!IS_AR) return (s.name || s.name_ar || "");
+    const code = String(s.code || "").toLowerCase();
+    const name = String(s.name || "").toLowerCase().trim();
+    const arByCode = {
+      wash: "غسيل",
+      wash_iron: "غسيل + كي",
+      washandiron: "غسيل + كي",
+      wash_and_iron: "غسيل + كي",
+      iron: "كي",
+      dry_clean: "تنظيف جاف",
+      dryclean: "تنظيف جاف",
+    };
+    const arByName = {
+      "wash & iron": "غسيل + كي",
+      "wash + iron": "غسيل + كي",
+      "wash": "غسيل",
+      "iron": "كي",
+      "dry clean": "تنظيف جاف",
+    };
+    return s.name_ar || arByCode[code] || arByName[name] || s.name || "";
+  };
+  const TXT = {
+    services: IS_AR ? "\u0627\u0644\u062e\u062f\u0645\u0627\u062a" : "{% trans 'Services' %}",
+    combos: IS_AR ? "\u0628\u0627\u0642\u0627\u062a" : "{% trans 'Combos' %}",
+    popularItems: IS_AR ? "\u0627\u0644\u0623\u0635\u0646\u0627\u0641 \u0627\u0644\u0634\u0627\u0626\u0639\u0629" : "{% trans 'Popular Items' %}",
+    lastItems: IS_AR ? "\u0622\u062e\u0631 \u0627\u0644\u0623\u0635\u0646\u0627\u0641" : "{% trans 'Last Items' %}",
+  };
+
+  if (IS_AR) {
+    const posSub = document.getElementById("posSub");
+    if (posSub) posSub.textContent = "\u062f\u0641\u0639 \u0633\u0631\u064a\u0639 \u2022 \u062c\u0627\u0647\u0632 \u0644\u0644\u0628\u0627\u0631\u0643\u0648\u062f \u2022 \u0637\u0628\u0627\u0639\u0629 \u062d\u0631\u0627\u0631\u064a\u0629";
+    const quickAddLabel = document.getElementById("quickAddLabel");
+    if (quickAddLabel) quickAddLabel.textContent = "\u0625\u0636\u0627\u0641\u0629 \u0633\u0631\u064a\u0639\u0629";
+    const quickShortcutLabel = document.getElementById("quickShortcutLabel");
+    if (quickShortcutLabel) quickShortcutLabel.textContent = "\u0627\u062e\u062a\u0635\u0627\u0631\u0627\u062a: Alt+F \u0644\u0644\u0647\u0627\u062a\u0641\u060c Alt+B \u0644\u0644\u0628\u0627\u0631\u0643\u0648\u062f\u060c Alt+A \u0644\u0644\u0625\u0636\u0627\u0641\u0629\u060c Alt+S \u0644\u0644\u062d\u0641\u0638\u060c Alt+P \u0644\u0644\u0637\u0628\u0627\u0639\u0629";
+    if (repeatLastBtn) repeatLastBtn.textContent = "\u0625\u0639\u0627\u062f\u0629 \u0622\u062e\u0631 \u0637\u0644\u0628";
+  }
+
+  const money = (n) => (Math.round(n * 1000) / 1000).toFixed(3);
+  const DEFAULT_VIP_DISCOUNT = parseFloat("{{ default_vip_discount|default:'0' }}") || 0;
+  const REDEEM_VALUE_PER_POINT = parseFloat("{{ redeem_value_per_point|default:'0' }}") || 0;
+  let vipDiscountPercent = 0;
+  let customerPoints = 0;
+
+  // -----------------------------
+  // Catalog loader
+  // -----------------------------
+  async function loadCatalog(){
+    const res = await fetch("/catalog/api/pos-data/");
+    if(!res.ok){
+      const cached = localStorage.getItem("pos_catalog_cache");
+      if(cached){
+        try{
+          CATALOG = JSON.parse(cached);
+        }catch(e){
+          CATALOG = { services:[], items:[], barcode_map:{}, price_map:{} };
+        }
+      } else {
+        itemSelect.innerHTML = `<option value="" selected disabled>${I18N.catalogApiError}</option>`;
+        serviceSelect.innerHTML = `<option value="wash">${I18N.defaultService}</option>`;
+        return;
+      }
+    }
+    if(res.ok){
+      CATALOG = await res.json();
+      localStorage.setItem("pos_catalog_cache", JSON.stringify(CATALOG));
+    }
+
+    // Services (use service.code as value)
+    serviceSelect.innerHTML = "";
+    (CATALOG.services || []).forEach((s, idx) => {
+      const opt = document.createElement("option");
+      opt.value = s.code;
+      opt.textContent = serviceDisplayName(s);
+      if(idx === 0) opt.selected = true;
+      serviceSelect.appendChild(opt);
+    });
+
+    // Items (use item.id as value)
+    itemSelect.innerHTML = `<option value="" selected disabled>${I18N.selectItem}</option>`;
+    (CATALOG.items || []).forEach(i => {
+      const opt = document.createElement("option");
+      opt.value = String(i.id);
+      opt.textContent = itemDisplayName(i);
+      itemSelect.appendChild(opt);
+    });
+
+    renderQuickServices();
+    renderQuickCombos();
+    renderQuickPopular();
+  }
+
+  function applyPriceFromCatalog(){
+    const itemId = itemSelect.value;
+    const svcCode = serviceSelect.value;
+    if(!itemId || !svcCode) return;
+
+    const key = `${itemId}:${svcCode}`;
+    if(CATALOG.price_map && CATALOG.price_map[key] !== undefined){
+      priceInput.value = CATALOG.price_map[key];
+    }
+  }
+
+  function applyBarcode(){
+    const code = (barcodeInput.value || "").trim().toUpperCase();
+    if(!code) return false;
+
+    const itemId = (CATALOG.barcode_map || {})[code];
+    if(itemId){
+      itemSelect.value = String(itemId);
+      applyPriceFromCatalog();
+      return true;
+    }
+    return false;
+  }
+
+  function findCatalogItemById(id){
+    return (CATALOG.items || []).find(i => String(i.id) === String(id));
+  }
+
+  function findCatalogItemByName(name){
+    const n = (name || "").toLowerCase();
+    return (CATALOG.items || []).find(i => ((i.name || "").toLowerCase() === n) || ((i.name_ar || "").toLowerCase() === n));
+  }
+
+  function findServiceByCode(code){
+    return (CATALOG.services || []).find(s => String(s.code) === String(code));
+  }
+
+  function findServiceByName(name){
+    const n = (name || "").toLowerCase();
+    return (CATALOG.services || []).find(s => ((s.name || "").toLowerCase() === n) || ((s.name_ar || "").toLowerCase() === n));
+  }
+
+  function getCatalogPrice(itemId, svcCode){
+    if(!itemId || !svcCode) return null;
+    const key = `${itemId}:${svcCode}`;
+    if(CATALOG.price_map && CATALOG.price_map[key] !== undefined){
+      return parseFloat(CATALOG.price_map[key]);
+    }
+    return null;
+  }
+
+  function validateItem(qty, price, catalogPrice){
+    if(qty < 1){
+      alert(I18N.zeroQtyWarning);
+      return false;
+    }
+    if(price < 0){
+      alert(I18N.negativePriceWarning);
+      return false;
+    }
+    if(catalogPrice !== null && catalogPrice >= 0){
+      const diff = Math.abs(price - catalogPrice);
+      if(catalogPrice > 0 && (diff / catalogPrice) > 0.5){
+        return confirm(I18N.priceAnomalyWarning);
+      }
+    }
+    if(price === 0){
+      return confirm(I18N.priceAnomalyWarning);
+    }
+    return true;
+  }
+
+  function renderQuickServices(){
+    if(!quickServices) return;
+    quickServices.innerHTML = "";
+    const services = (CATALOG.services || []).slice(0, 5);
+    if(!services.length) return;
+    quickServices.appendChild(makeQuickLabel(TXT.services));
+    services.forEach(s => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-btn";
+      btn.textContent = serviceDisplayName(s);
+      btn.dataset.service = s.code;
+      btn.onclick = () => {
+        serviceSelect.value = s.code;
+        applyPriceFromCatalog();
+        qtyInput.focus();
+      };
+      quickServices.appendChild(btn);
+    });
+  }
+
+  function renderQuickCombos(){
+    if(!quickCombos) return;
+    quickCombos.innerHTML = "";
+    const combos = [];
+    const washIron = findServiceByCode("wash_iron") || findServiceByName("Wash + Iron");
+    if(washIron){
+      combos.push({ label: serviceDisplayName(washIron), code: washIron.code });
+    }
+    if(!combos.length) return;
+    quickCombos.appendChild(makeQuickLabel(TXT.combos));
+    combos.forEach(c => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-btn combo";
+      btn.textContent = c.label;
+      btn.onclick = () => {
+        serviceSelect.value = c.code;
+        applyPriceFromCatalog();
+        qtyInput.focus();
+      };
+      quickCombos.appendChild(btn);
+    });
+  }
+
+  function renderQuickPopular(){
+    if(!quickPopular) return;
+    quickPopular.innerHTML = "";
+    const popular = (CATALOG.items || []).slice(0, 8);
+    if(!popular.length) return;
+    quickPopular.appendChild(makeQuickLabel(TXT.popularItems));
+    popular.forEach(i => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-btn";
+      btn.textContent = itemDisplayName(i);
+      btn.dataset.itemId = i.id;
+      btn.onclick = () => {
+        itemSelect.value = String(i.id);
+        applyPriceFromCatalog();
+        addItemFromSelection();
+      };
+      quickPopular.appendChild(btn);
+    });
+  }
+
+  function renderQuickLast(){
+    if(!quickLast) return;
+    quickLast.innerHTML = "";
+    if(!lastOrder || !lastOrder.items || !lastOrder.items.length){
+      return;
+    }
+    quickLast.appendChild(makeQuickLabel(TXT.lastItems));
+    lastOrder.items.slice(0, 8).forEach(it => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-btn";
+      const itemObj = findCatalogItemByName(it.item || "");
+      const svcObj = findServiceByName(it.service || "");
+      const itemTxt = itemObj ? itemDisplayName(itemObj) : (it.item || "");
+      const svcTxt = svcObj ? serviceDisplayName(svcObj) : (it.service || "");
+      btn.textContent = `${itemTxt} • ${svcTxt}`;
+      btn.onclick = () => addItemDirect(it);
+      quickLast.appendChild(btn);
+    });
+  }
+
+  function makeQuickLabel(text){
+    const span = document.createElement("span");
+    span.className = "quick-label";
+    span.textContent = text;
+    return span;
+  }
+
+  async function loadCustomerById(id){
+    if(!id) return;
+    const res = await fetch(`/orders/api/customer-get/?id=${encodeURIComponent(id)}`);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data.ok && data.found){
+      setCustomer(data.customer || {});
+    }
+  }
+
+  async function loadLastOrder(){
+    if(!currentCustomer || !currentCustomer.id){
+      lastOrder = null;
+      renderQuickLast();
+      repeatLastBtn.disabled = true;
+      return;
+    }
+    const res = await fetch(`/orders/api/customer-last-order/?customer_id=${encodeURIComponent(currentCustomer.id)}`);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data.ok && data.found){
+      lastOrder = data.order;
+      repeatLastBtn.disabled = false;
+      promoteLastItemsInSelect(lastOrder.items || []);
+    } else {
+      lastOrder = null;
+      repeatLastBtn.disabled = true;
+    }
+    renderQuickLast();
+  }
+
+  function promoteLastItemsInSelect(itemsList){
+    if(!itemsList || !itemsList.length) return;
+    const seen = new Set();
+    itemsList.forEach(it => {
+      const name = (it.item || "").toLowerCase();
+      if(!name || seen.has(name)) return;
+      seen.add(name);
+      const opt = Array.from(itemSelect.options).find(o => (o.textContent || "").toLowerCase() === name);
+      if(opt && itemSelect.options.length > 1){
+        itemSelect.removeChild(opt);
+        itemSelect.insertBefore(opt, itemSelect.options[1]);
+      }
+    });
+  }
+
+  async function checkDuplicateOrder(phone){
+    if(!phone) return false;
+    const res = await fetch(`/orders/api/customer-duplicate-check/?phone=${encodeURIComponent(phone)}&hours=6`);
+    if(!res.ok) return false;
+    const data = await res.json();
+    return !!data.duplicate;
+  }
+
+  function applyLastOrder(replaceExisting=true){
+    if(!lastOrder || !lastOrder.items || !lastOrder.items.length){
+      alert(I18N.lastOrderMissing);
+      return;
+    }
+    if(replaceExisting){
+      items.length = 0;
+    }
+    lastOrder.items.forEach(it => addItemDirect(it));
+  }
+
+  // -----------------------------
+  // Totals + render
+  // -----------------------------
+  function applyVipDiscount(subtotal){
+    const applyVip = document.getElementById("applyVip").checked;
+    const vipSelected = document.getElementById("custVip").value === "yes";
+    if(vipSelected && vipDiscountPercent === 0 && DEFAULT_VIP_DISCOUNT > 0){
+      vipDiscountPercent = DEFAULT_VIP_DISCOUNT;
+    }
+    const discountInput = document.getElementById("discount");
+    const vipRateText = document.getElementById("vipRateText");
+
+    if(applyVip && vipSelected && vipDiscountPercent > 0){
+      const d = (subtotal * vipDiscountPercent) / 100;
+      discountInput.value = money(d);
+      discountInput.readOnly = true;
+      vipRateText.textContent = `${I18N.vipLabel} ${vipDiscountPercent}%`; 
+    } else {
+      discountInput.readOnly = false;
+      vipRateText.textContent = "";
+    }
+  }
+
+  function applyRedeem(subtotal){
+    const redeemInput = document.getElementById("redeemPoints");
+    let points = parseInt(redeemInput.value || "0", 10);
+    if(isNaN(points) || points < 0) points = 0;
+    if(points > customerPoints) points = customerPoints;
+
+    let value = points * REDEEM_VALUE_PER_POINT;
+    if(value > subtotal) value = subtotal;
+    redeemInput.value = points;
+    document.getElementById("redeemValue").textContent = `${money(value)} OMR`;
+    return value;
+  }
+
+  function recalc(){
+    const subtotal = items.reduce((s, it) => s + (it.qty * it.price), 0);
+    document.getElementById("subtotal").textContent = money(subtotal);
+
+    applyVipDiscount(subtotal);
+    const redeemValue = applyRedeem(subtotal);
+
+    const discount = parseFloat(document.getElementById("discount").value || "0");
+    const tax = parseFloat(document.getElementById("tax").value || "0");
+    const total = Math.max(0, subtotal - discount - redeemValue + tax);
+    document.getElementById("grandTotal").textContent = money(total);
+
+    const paid = parseFloat(document.getElementById("paid").value || "0");
+    const due = Math.max(0, total - paid);
+    document.getElementById("balance").value = money(due);
+
+    document.getElementById("itemCount").textContent = items.length;
+  }
+
+  function render(){
+    tbody.innerHTML = "";
+    items.forEach((it, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${it.item}</b></td>
+        <td>${it.service}</td>
+        <td class="right"><input class="cell-input qty" type="number" min="1" data-i="${idx}" value="${it.qty}"></td>
+        <td class="right"><input class="cell-input price" type="number" step="0.001" min="0" data-i="${idx}" value="${money(it.price)}"></td>
+        <td class="right"><b>${money(it.qty * it.price)}</b></td>
+        <td class="right"><button class="xbtn" data-i="${idx}">x</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll(".xbtn").forEach(btn => {
+      btn.onclick = () => {
+        items.splice(parseInt(btn.dataset.i), 1);
+        render();
+        recalc();
+        barcodeInput.focus();
+      };
+    });
+
+    document.querySelectorAll(".cell-input.qty").forEach(inp => {
+      inp.onchange = () => {
+        const idx = parseInt(inp.dataset.i);
+        const val = parseInt(inp.value || "1");
+        items[idx].qty = isNaN(val) || val < 1 ? 1 : val;
+        render();
+        recalc();
+      };
+    });
+
+    document.querySelectorAll(".cell-input.price").forEach(inp => {
+      inp.onchange = () => {
+        const idx = parseInt(inp.dataset.i);
+        const val = parseFloat(inp.value || "0");
+        items[idx].price = isNaN(val) || val < 0 ? 0 : val;
+        render();
+        recalc();
+      };
+    });
+  }
+
+  function addItemFromSelection(){
+    const itemId = itemSelect.value;
+    if(!itemId){ alert(I18N.pleaseSelectItem); return; }
+
+    const itemName = itemSelect.options[itemSelect.selectedIndex].text;
+    const svcCode = serviceSelect.value;
+    const svcName = serviceSelect.options[serviceSelect.selectedIndex].text;
+    const qty = parseInt(qtyInput.value || "1");
+    const price = parseFloat(priceInput.value || "0");
+
+    const catalogPrice = getCatalogPrice(itemId, svcCode);
+    if(!validateItem(qty, price, catalogPrice)) return;
+
+    items.push({ item: itemName, service: svcName, qty, price });
+    render();
+    recalc();
+
+    barcodeInput.value = "";
+    qtyInput.value = 1;
+    barcodeInput.focus();
+  }
+
+  function addItemDirect(it){
+    const itemNameRaw = it.item || "";
+    const svcNameRaw = it.service || "";
+    const itemObj = findCatalogItemByName(itemNameRaw);
+    const svcObj = findServiceByName(svcNameRaw);
+    const itemName = itemObj ? itemDisplayName(itemObj) : itemNameRaw;
+    const svcName = svcObj ? serviceDisplayName(svcObj) : svcNameRaw;
+    const qty = parseInt(it.qty || 1);
+    const price = parseFloat(it.price || 0);
+
+    const catalogPrice = getCatalogPrice(itemObj ? itemObj.id : null, svcObj ? svcObj.code : null);
+    if(!validateItem(qty, price, catalogPrice)) return;
+
+    items.push({ item: itemName, service: svcName, qty, price });
+    render();
+    recalc();
+    barcodeInput.focus();
+  }
+
+  document.getElementById("discount").addEventListener("input", () => {
+    if(document.getElementById("discount").readOnly){
+      document.getElementById("applyVip").checked = false;
+      document.getElementById("discount").readOnly = false;
+      recalc();
+    }
+  });
+
+  document.getElementById("redeemPoints").addEventListener("input", () => {
+    const val = parseInt(document.getElementById("redeemPoints").value || "0", 10);
+    if(isNaN(val) || val < 0){
+      document.getElementById("redeemPoints").value = "0";
+    }
+  });
+
+  // -----------------------------
+  // Clear / Save
+  // -----------------------------
+  function clearAll(){
+    items.length = 0;
+    render();
+    ["discount","tax","paid","redeemPoints"].forEach(id => document.getElementById(id).value = "0");
+    document.getElementById("custPhone").value = "";
+    document.getElementById("custName").value = "";
+    document.getElementById("custVip").value = "no";
+    document.getElementById("custPoints").textContent = "0";
+    document.getElementById("applyVip").checked = false;
+    vipDiscountPercent = 0;
+    customerPoints = 0;
+    currentCustomer = null;
+    lastOrder = null;
+    repeatLastBtn.disabled = true;
+    renderQuickLast();
+    document.getElementById("notes").value = "";
+    barcodeInput.value = "";
+    qtyInput.value = 1;
+    recalc();
+    barcodeInput.focus();
+  }
+
+  async function saveOrderToDB({printAfter=false} = {}){
+    if(items.length === 0){
+      alert("No items in order");
+      return;
+    }
+
+    const phoneVal = (document.getElementById("custPhone").value || "").trim();
+    const nameVal = (document.getElementById("custName").value || "").trim();
+    if(!phoneVal && !nameVal){
+      const ok = confirm(I18N.missingPhoneWarning);
+      if(!ok) return;
+    }
+
+    if(phoneVal){
+      const isDup = await checkDuplicateOrder(phoneVal);
+      if(isDup){
+        const ok = confirm(I18N.duplicateOrderWarning);
+        if(!ok) return;
+      }
+    }
+
+    const totalVal = parseFloat(document.getElementById("grandTotal").textContent || "0");
+    const paidVal = parseFloat(document.getElementById("paid").value || "0");
+    if(paidVal > totalVal + 0.001){
+      const ok = confirm("{% trans "Paid exceeds total. Continue?" %}");
+      if(!ok) return;
+    }
+
+    const csrf = (document.querySelector("[name=csrfmiddlewaretoken]") || {}).value;
+
+    const payload = {
+      customer: {
+        phone: phoneVal,
+        name: nameVal,
+        vip: (document.getElementById("custVip").value || "").toLowerCase() === "yes",
+      },
+      items: items.map(it => ({
+        item: it.item,
+        service: it.service,
+        qty: it.qty,
+        price: it.price,
+      })),
+      discount: document.getElementById("discount").value || 0,
+      tax: document.getElementById("tax").value || 0,
+      paid: document.getElementById("paid").value || 0,
+      notes: document.getElementById("notes").value || "",
+      apply_vip_discount: document.getElementById("applyVip").checked,
+      redeem_points: document.getElementById("redeemPoints").value || 0,
+      pay_method: (document.querySelector(".pay-btn.active") || {}).dataset?.pay || "cash",
+    };
+
+    let res;
+    let data;
+    try{
+      res = await fetch("/pos/api/create-order/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf,
+        },
+        body: JSON.stringify(payload),
+      });
+      data = await res.json();
+    }catch(e){
+      saveOffline(payload);
+      alert("Saved offline. Sync when online.");
+      clearAll();
+      return;
+    }
+
+    if(!data.ok){
+      if(res.status >= 500 || res.status === 0){
+        saveOffline(payload);
+        alert("Saved offline. Sync when online.");
+        clearAll();
+        return;
+      }
+      alert(data.error || "Failed to save");
+      return;
+    }
+
+    if(printAfter){
+      window.open(`/pos/receipt/80mm/?order=${data.order_no}`, "_blank");
+    } else {
+      alert("Order saved: #" + data.order_no);
+    }
+
+    clearAll();
+  }
+
+  function getOfflineQueue(){
+    try{
+      return JSON.parse(localStorage.getItem("pos_offline_queue") || "[]");
+    }catch(e){
+      return [];
+    }
+  }
+
+  function setOfflineQueue(list){
+    localStorage.setItem("pos_offline_queue", JSON.stringify(list || []));
+    document.getElementById("offlineCount").textContent = String((list || []).length);
+  }
+
+  function saveOffline(payload){
+    const q = getOfflineQueue();
+    q.push({ payload, at: new Date().toISOString() });
+    setOfflineQueue(q);
+  }
+
+  async function syncOffline(){
+    const q = getOfflineQueue();
+    if(!q.length){
+      alert(IS_AR ? "لا توجد طلبات دون اتصال للمزامنة." : "No offline orders to sync.");
+      return;
+    }
+    const csrf = (document.querySelector("[name=csrfmiddlewaretoken]") || {}).value;
+    let remaining = [];
+    let reasons = [];
+    for(const entry of q){
+      try{
+        const res = await fetch("/pos/api/create-order/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf,
+          },
+          body: JSON.stringify(entry.payload),
+        });
+        let data = {};
+        let raw = "";
+        const contentType = (res.headers.get("content-type") || "").toLowerCase();
+        if(contentType.includes("application/json")){
+          data = await res.json().catch(() => ({}));
+        }else{
+          raw = await res.text().catch(() => "");
+        }
+        if(!res.ok || !data.ok){
+          remaining.push(entry);
+          const hint = (raw || "").replace(/\s+/g, " ").trim().slice(0, 120);
+          reasons.push(data.error || hint || (`HTTP ${res.status}`));
+        }
+      }catch(e){
+        remaining.push(entry);
+        reasons.push("Network/timeout");
+      }
+    }
+    setOfflineQueue(remaining);
+    if(remaining.length){
+      const uniqueReasons = Array.from(new Set(reasons)).filter(Boolean).slice(0, 3);
+      const reasonText = uniqueReasons.length ? `\n- ${uniqueReasons.join("\n- ")}` : "";
+      alert(
+        IS_AR
+          ? `فشلت مزامنة بعض الطلبات دون اتصال.${reasonText}`
+          : `Some offline orders failed to sync.${reasonText}`
+      );
+    }else{
+      alert(IS_AR ? "تمت مزامنة الطلبات دون اتصال." : "Offline orders synced.");
+    }
+  }
+
+  // -----------------------------
+  // Events
+  // -----------------------------
+  document.getElementById("addBtn").onclick = addItemFromSelection;
+  document.getElementById("clearBtn").onclick = clearAll;
+  if(findCustomerBtn) findCustomerBtn.onclick = findCustomerAction;
+  if(newCustomerBtn) newCustomerBtn.onclick = resetCustomerPanel;
+
+  document.getElementById("saveBtn").onclick = () => saveOrderToDB({printAfter:false});
+  document.getElementById("printBtn").onclick = () => saveOrderToDB({printAfter:true});
+  document.getElementById("completeBtn").onclick = () => saveOrderToDB({printAfter:false});
+  document.getElementById("syncBtn").onclick = syncOffline;
+
+  window.addEventListener("online", () => {
+    syncOffline();
+  });
+  repeatLastBtn.onclick = () => {
+    const replace = items.length === 0 || confirm(I18N.replaceItemsConfirm);
+    if(replace){
+      applyLastOrder(true);
+    }
+  };
+
+  document.getElementById("holdBtn").onclick = () => alert("Hold saved (local only for now)");
+
+  // price auto-fill
+  itemSelect.addEventListener("change", applyPriceFromCatalog);
+  serviceSelect.addEventListener("change", applyPriceFromCatalog);
+
+  // barcode workflow: Enter adds item
+  barcodeInput.addEventListener("keydown", (e) => {
+    if(e.key === "Escape"){
+      barcodeInput.value = "";
+      barcodeInput.focus();
+      return;
+    }
+    if(e.key === "Enter"){
+      e.preventDefault();
+      applyBarcode();
+
+      // if no item selected, don't force a wrong item
+      if(!itemSelect.value){
+        alert("Barcode not found. Please select item.");
+        return;
+      }
+      addItemFromSelection();
+    }
+  });
+
+  // Enter in Qty/Price adds item
+  [qtyInput, priceInput].forEach(el => {
+    el.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        addItemFromSelection();
+      }
+    });
+  });
+
+  ["discount","tax","paid","redeemPoints"].forEach(id => {
+    document.getElementById(id).addEventListener("input", recalc);
+  });
+
+  document.getElementById("applyVip").addEventListener("change", recalc);
+  document.getElementById("custVip").addEventListener("change", recalc);
+
+  function setCustomer(c){
+    currentCustomer = c || null;
+    document.getElementById("custName").value = c.name || "";
+    document.getElementById("custPhone").value = c.phone || "";
+    document.getElementById("custVip").value = c.vip ? "yes" : "no";
+    document.getElementById("custPoints").textContent = c.points || 0;
+    customerPoints = parseInt(c.points || 0, 10);
+    vipDiscountPercent = parseFloat(c.vip_discount_percent || 0);
+    document.getElementById("applyVip").checked = c.vip && vipDiscountPercent > 0;
+    recalc();
+    loadLastOrder();
+    barcodeInput.focus();
+  }
+
+  function renderCustomerSuggestions(list){
+    const box = document.getElementById("custSuggest");
+    if(!list.length){
+      box.hidden = true;
+      box.innerHTML = "";
+      return;
+    }
+    box.innerHTML = list.map(c => {
+      const vip = c.vip ? "VIP" : "";
+      return `<button type="button" class="typeahead-item" data-id="${c.id}">
+        <span><b>${c.name || "-"}</b> ${vip ? `<span class='tag'>${vip}</span>` : ""}</span>
+        <span class="muted">${c.phone || "-"} â€¢ ${c.points || 0} pts</span>
+      </button>`;
+    }).join("");
+    box.hidden = false;
+
+    box.querySelectorAll(".typeahead-item").forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.id;
+        const c = list.find(x => String(x.id) === String(id));
+        if(c) setCustomer(c);
+        box.hidden = true;
+      };
+    });
+  }
+
+  let searchTimer = null;
+  async function searchCustomers(){
+    const q = (document.getElementById("custPhone").value || "").trim();
+    if(q.length < 2){
+      renderCustomerSuggestions([]);
+      return;
+    }
+    const res = await fetch(`/orders/api/customer-search/?q=${encodeURIComponent(q)}`);
+    if(!res.ok) return;
+    const data = await res.json();
+    renderCustomerSuggestions(data.results || []);
+  }
+
+  async function lookupCustomer(){
+    const phone = (document.getElementById("custPhone").value || "").trim();
+    if(!phone) return;
+
+    const res = await fetch(`/orders/api/customer-lookup/?phone=${encodeURIComponent(phone)}`);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data.ok || !data.found){
+      setDraftCustomer();
+      return;
+    }
+
+    const c = data.customer || {};
+    setCustomer(c);
+  }
+
+  function setDraftCustomer(){
+    const phone = (document.getElementById("custPhone").value || "").trim();
+    const name = (document.getElementById("custName").value || "").trim();
+    if(!phone && !name) return;
+    currentCustomer = { id: null, phone, name, vip: false, points: 0, vip_discount_percent: 0 };
+    lastOrder = null;
+    repeatLastBtn.disabled = true;
+    renderQuickLast();
+  }
+
+  function resetCustomerPanel(){
+    currentCustomer = null;
+    lastOrder = null;
+    repeatLastBtn.disabled = true;
+    renderQuickLast();
+    vipDiscountPercent = 0;
+    customerPoints = 0;
+    document.getElementById("custName").value = "";
+    document.getElementById("custPhone").value = "";
+    document.getElementById("custVip").value = "no";
+    document.getElementById("custPoints").textContent = "0";
+    document.getElementById("applyVip").checked = false;
+    document.getElementById("redeemPoints").value = "0";
+    recalc();
+    document.getElementById("custPhone").focus();
+  }
+
+  async function findCustomerAction(){
+    const phone = (document.getElementById("custPhone").value || "").trim();
+    const name = (document.getElementById("custName").value || "").trim();
+    const q = (phone || name).trim();
+    if(q.length < 2){
+      alert(IS_AR ? "أدخل رقم الهاتف أو اسم العميل للبحث." : "Enter phone or customer name to search.");
+      document.getElementById("custPhone").focus();
+      return;
+    }
+
+    if(phone){
+      await lookupCustomer();
+      if(currentCustomer && (currentCustomer.id || currentCustomer.phone)){
+        return;
+      }
+    }
+
+    try{
+      const res = await fetch(`/orders/api/customer-search/?q=${encodeURIComponent(q)}`);
+      if(!res.ok){
+        alert(IS_AR ? "تعذر البحث عن العميل." : "Could not search customer.");
+        return;
+      }
+      const data = await res.json();
+      const results = data.results || [];
+      if(!results.length){
+        alert(IS_AR ? "لا يوجد عميل مطابق." : "No matching customer found.");
+        return;
+      }
+      if(results.length === 1){
+        setCustomer(results[0]);
+        return;
+      }
+      renderCustomerSuggestions(results);
+      alert(IS_AR ? "تم العثور على أكثر من عميل. اختر من القائمة." : "Multiple customers found. Please choose from the list.");
+    }catch(e){
+      alert(IS_AR ? "فشل البحث. حاول مرة أخرى." : "Search failed. Please try again.");
+    }
+  }
+
+  document.getElementById("custPhone").addEventListener("blur", () => {
+    setTimeout(() => {
+      const box = document.getElementById("custSuggest");
+      if(box.hidden){
+        lookupCustomer();
+      }
+    }, 120);
+  });
+  document.getElementById("custPhone").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      lookupCustomer();
+    }
+  });
+  document.getElementById("custName").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      setDraftCustomer();
+      barcodeInput.focus();
+    }
+  });
+  document.getElementById("custName").addEventListener("blur", () => {
+    setDraftCustomer();
+  });
+  document.getElementById("custPhone").addEventListener("input", () => {
+    const raw = (document.getElementById("custPhone").value || "").trim();
+    if(currentCustomer && (currentCustomer.phone || "") !== raw){
+      currentCustomer = null;
+      lastOrder = null;
+      repeatLastBtn.disabled = true;
+      renderQuickLast();
+    }
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(searchCustomers, 200);
+  });
+  document.getElementById("custPhone").addEventListener("focus", searchCustomers);
+  document.addEventListener("click", (e) => {
+    const box = document.getElementById("custSuggest");
+    if(!box.contains(e.target) && e.target.id !== "custPhone"){
+      box.hidden = true;
+    }
+  });
+
+  document.querySelectorAll(".pay-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".pay-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // quick cash flow: set paid = total
+      if(btn.dataset.pay === "cash"){
+        document.getElementById("paid").value = document.getElementById("grandTotal").textContent;
+        recalc();
+      }
+    };
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if(!e.altKey) return;
+    const key = (e.key || "").toLowerCase();
+    if(key === "f"){ e.preventDefault(); document.getElementById("custPhone").focus(); }
+    if(key === "b"){ e.preventDefault(); barcodeInput.focus(); }
+    if(key === "a"){ e.preventDefault(); addItemFromSelection(); }
+    if(key === "s"){ e.preventDefault(); saveOrderToDB({printAfter:false}); }
+    if(key === "p"){ e.preventDefault(); saveOrderToDB({printAfter:true}); }
+  });
+
+  // Init
+  loadCatalog().then(async () => {
+    applyPriceFromCatalog();
+    recalc();
+    setOfflineQueue(getOfflineQueue());
+    const params = new URLSearchParams(window.location.search || "");
+    const customerId = params.get("customer_id");
+    const repeatLast = params.get("repeat_last") === "1";
+    if(customerId){
+      await loadCustomerById(customerId);
+      if(repeatLast){
+        await loadLastOrder();
+        applyLastOrder(true);
+      }
+    }
+    barcodeInput.focus();
+  });
+</script>
+
+{% endblock %}
+
+
+

@@ -1,0 +1,88 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Reset App Data</h1>
+
+<p><strong>Warning:</strong> This removes transactional data only. Users, branches, and settings remain.</p>
+
+<form method="post" style="margin-top: 16px;">
+  {% csrf_token %}
+
+  <fieldset class="module aligned" style="margin-bottom: 16px;">
+    <h2>Reset Scope</h2>
+    <div class="form-row">
+      <label style="display:block; margin-bottom: 8px;">
+        <input type="radio" name="scope" value="all" {% if scope != "branch" %}checked{% endif %} />
+        All branches
+      </label>
+      <label style="display:block;">
+        <input type="radio" name="scope" value="branch" {% if scope == "branch" %}checked{% endif %} />
+        Single branch
+      </label>
+    </div>
+    <div class="form-row" id="branch-row" style="{% if scope != 'branch' %}opacity:.55;{% endif %}">
+      <label for="id_branch_code">Branch</label>
+      <select id="id_branch_code" name="branch_code" style="min-width: 220px;">
+        <option value="">-- Select branch --</option>
+        {% for b in branches %}
+        <option value="{{ b.code }}" {% if branch_code|upper == b.code|upper %}selected{% endif %}>
+          {{ b.code }} - {{ b.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+  </fieldset>
+
+  <h2>Rows to Delete</h2>
+  <ul>
+    {% for model in models %}
+      <li>{{ model.label }}: {{ model.count }}</li>
+    {% endfor %}
+  </ul>
+
+  <fieldset class="module aligned" style="margin-top:16px;">
+    <h2>Confirmation</h2>
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="confirm" />
+        I understand this will permanently delete data.
+      </label>
+    </div>
+    <div class="form-row">
+      <p style="margin:0 0 8px 0;">
+        Type exact phrase:
+        <code id="expected-all">{{ expected_all }}</code> (all branches)
+        or
+        <code id="expected-branch">{{ expected_branch }}</code> (single branch)
+      </p>
+      <label for="id_confirm_text">Confirmation text</label>
+      <input id="id_confirm_text" type="text" name="confirm_text" style="min-width: 320px;" />
+      <p style="margin-top:8px; color:#666;">Date must be today: {{ today_str }}</p>
+    </div>
+  </fieldset>
+
+  <button type="submit" class="default">Reset App Data</button>
+</form>
+
+<script>
+  (function () {
+    const scopeAll = document.querySelector('input[name="scope"][value="all"]');
+    const scopeBranch = document.querySelector('input[name="scope"][value="branch"]');
+    const branchRow = document.getElementById('branch-row');
+    const branchSelect = document.getElementById('id_branch_code');
+    const expectedBranch = document.getElementById('expected-branch');
+    const today = '{{ today_str }}';
+    const setState = () => {
+      const isBranch = scopeBranch && scopeBranch.checked;
+      branchRow.style.opacity = isBranch ? '1' : '.55';
+      branchSelect.disabled = !isBranch;
+      const code = (branchSelect.value || 'SLL').toUpperCase();
+      expectedBranch.textContent = 'RESET ' + code + ' ' + today;
+    };
+    if (scopeAll) scopeAll.addEventListener('change', setState);
+    if (scopeBranch) scopeBranch.addEventListener('change', setState);
+    if (branchSelect) branchSelect.addEventListener('change', setState);
+    setState();
+  })();
+</script>
+{% endblock %}

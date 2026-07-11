@@ -1,0 +1,283 @@
+﻿LAUNDREX PRODUCTION GO-LIVE GUIDE (WEB + MOBILE)
+================================================
+Prepared for when domain and cloud database are purchased.
+Project root: C:\Users\LENOVO\Desktop\laundrex
+
+
+PART A) WEB APP GO-LIVE (DOMAIN + CLOUD DATABASE)
+==================================================
+
+A1) What you need before deployment
+-----------------------------------
+1. Domain name (example: laundrex.com)
+2. Cloud server (Ubuntu 22.04 recommended) OR managed platform
+3. Managed PostgreSQL database (recommended)
+4. SSL certificate (Let's Encrypt)
+5. Email service (optional but recommended)
+6. Backup plan (database + media)
+
+
+A2) Recommended production stack
+--------------------------------
+1. OS: Ubuntu Linux
+2. App server: Gunicorn
+3. Reverse proxy: Nginx
+4. Database: PostgreSQL (managed)
+5. Static/media storage:
+   - Option 1: local disk (small setup)
+   - Option 2: object storage (S3/Cloudflare R2) for scalable setup
+
+
+A3) Prepare Django for production
+---------------------------------
+1. In `.env` set production values:
+   - DEBUG=False
+   - SECRET_KEY=<long-random-secret>
+   - ALLOWED_HOSTS=your-domain.com,www.your-domain.com
+   - CSRF_TRUSTED_ORIGINS=https://your-domain.com,https://www.your-domain.com
+   - DATABASE_URL=postgres://user:pass@host:5432/dbname
+
+2. Update settings (if not already done):
+   - Read DB from env (PostgreSQL)
+   - Configure static/media paths
+   - Secure cookies:
+     SESSION_COOKIE_SECURE=True
+     CSRF_COOKIE_SECURE=True
+   - Add security headers:
+     SECURE_SSL_REDIRECT=True (after SSL configured)
+
+3. Install deployment packages:
+   pip install gunicorn psycopg2-binary whitenoise
+
+4. Run migration and static collection:
+   python manage.py migrate
+   python manage.py collectstatic --noinput
+
+5. Create/verify superuser:
+   python manage.py createsuperuser
+
+
+A4) Server setup (Ubuntu VPS path)
+----------------------------------
+1. Update server:
+   sudo apt update && sudo apt upgrade -y
+
+2. Install system packages:
+   sudo apt install -y python3-pip python3-venv nginx git
+
+3. Clone project on server:
+   git clone <your-repo-url> /var/www/laundrex
+   cd /var/www/laundrex
+
+4. Create venv and install dependencies:
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   pip install gunicorn psycopg2-binary whitenoise
+
+5. Set `.env` production values.
+
+6. Run app checks:
+   python manage.py migrate
+   python manage.py collectstatic --noinput
+   python manage.py check
+
+
+A5) Create Gunicorn service
+---------------------------
+1. Create `/etc/systemd/system/laundrex.service` with app path and env.
+2. Enable service:
+   sudo systemctl daemon-reload
+   sudo systemctl enable laundrex
+   sudo systemctl start laundrex
+3. Verify:
+   sudo systemctl status laundrex
+
+
+A6) Configure Nginx
+-------------------
+1. Create Nginx site config for your domain.
+2. Reverse proxy requests to Gunicorn socket/port.
+3. Serve static/media paths.
+4. Test and reload:
+   sudo nginx -t
+   sudo systemctl reload nginx
+
+
+A7) Point domain to server
+--------------------------
+1. In domain DNS panel:
+   - Add A record: @ -> server_public_ip
+   - Add A record: www -> server_public_ip
+2. Wait DNS propagation (5 min to 24 hours).
+
+
+A8) Enable HTTPS (SSL)
+----------------------
+1. Install certbot:
+   sudo apt install -y certbot python3-certbot-nginx
+2. Issue certificate:
+   sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+3. Auto-renew check:
+   sudo certbot renew --dry-run
+
+
+A9) Final production verification checklist
+-------------------------------------------
+1. Home/login/admin open on HTTPS domain
+2. No DEBUG pages visible
+3. Static files loaded correctly
+4. Media uploads working
+5. Orders/POS/Reports working
+6. Mobile API working from public domain:
+   https://your-domain.com/api/...
+7. Backups enabled and tested
+
+
+A10) Backup and monitoring
+--------------------------
+1. Daily DB backup cron job
+2. Weekly restore test
+3. Log monitoring:
+   - /var/log/nginx/
+   - journalctl -u laundrex
+4. Uptime monitor on domain
+
+
+PART B) MOBILE APP GO-LIVE (PLAY STORE + APP STORE)
+====================================================
+
+B1) Mobile production prerequisites
+-----------------------------------
+1. Public HTTPS backend domain live
+2. Mobile API tested on domain
+3. Privacy policy URL (required by stores)
+4. Terms/Support URL and support email
+5. App icons, screenshots, banner graphics ready
+
+
+B2) Configure mobile app for production API
+-------------------------------------------
+1. Build with production API base URL:
+   --dart-define=API_BASE_URL=https://your-domain.com
+2. Confirm login/order flow works against production domain.
+
+
+B3) Android release (Play Store)
+--------------------------------
+1. Go to Flutter app folder:
+   cd C:\Users\LENOVO\Desktop\laundrex\laundrex_mobile_app\flutter_app
+
+2. Create release keystore (one time):
+   keytool -genkey -v -keystore android\app\laundrex-upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias laundrex
+
+3. Configure signing in:
+   - android/key.properties
+   - android/app/build.gradle
+
+4. Build app bundle (Play Store):
+   flutter build appbundle --release --dart-define=API_BASE_URL=https://your-domain.com
+
+5. Output file:
+   build\app\outputs\bundle\release\app-release.aab
+
+6. Play Console steps:
+   - Create app
+   - Fill app details
+   - Upload privacy policy
+   - Complete Data Safety form
+   - Set content rating
+   - Create production release
+   - Upload `app-release.aab`
+   - Submit for review
+
+
+B4) Optional Android APK (direct testing)
+-----------------------------------------
+1. Build APK:
+   flutter build apk --release --dart-define=API_BASE_URL=https://your-domain.com
+2. File:
+   build\app\outputs\flutter-apk\app-release.apk
+
+
+B5) iOS release (App Store)
+---------------------------
+IMPORTANT: iOS publishing requires macOS + Xcode + Apple Developer account.
+
+1. On Mac, open Flutter app and run:
+   flutter pub get
+   flutter build ios --release --dart-define=API_BASE_URL=https://your-domain.com
+
+2. Open iOS workspace:
+   open ios/Runner.xcworkspace
+
+3. In Xcode:
+   - Set Bundle Identifier
+   - Set Team (Apple Developer account)
+   - Set signing/capabilities
+   - Product > Archive
+
+4. In App Store Connect:
+   - Create app record
+   - Fill metadata/screenshots/privacy policy
+   - Upload archive from Xcode Organizer
+   - Complete App Privacy questionnaire
+   - Submit for review
+
+
+B6) Store listing checklist (Android + iOS)
+-------------------------------------------
+1. App name, subtitle, full description
+2. Feature graphic + icon + screenshots
+3. Contact/support email
+4. Privacy policy link
+5. Category + age rating
+6. Test credentials (if login required)
+7. Stable backend URL (production)
+
+
+B7) After store approval
+------------------------
+1. Publish app
+2. Monitor crash logs and reviews
+3. Keep versioning discipline:
+   - Android: versionCode/versionName
+   - iOS: build number/version
+4. Maintain release notes for each update
+
+
+PART C) QUICK GO-LIVE COMMAND REFERENCE
+=======================================
+
+C1) Web production prep (local/server)
+--------------------------------------
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py check
+
+C2) Android Play build
+----------------------
+flutter build appbundle --release --dart-define=API_BASE_URL=https://your-domain.com
+
+C3) Android APK test build
+--------------------------
+flutter build apk --release --dart-define=API_BASE_URL=https://your-domain.com
+
+C4) iOS release build (Mac)
+---------------------------
+flutter build ios --release --dart-define=API_BASE_URL=https://your-domain.com
+
+
+PART D) IMPORTANT NOTES FOR YOUR CURRENT PROJECT
+================================================
+1. You are currently developing on localhost; store apps must use public HTTPS domain.
+2. SQLite is fine for local dev; production should use PostgreSQL.
+3. Keep `.env` secrets out of git.
+4. Run migrations immediately after any model changes in production.
+5. Test full flow after go-live:
+   - register/login
+   - create order (mobile)
+   - process order (web/desktop)
+   - notifications/status updates
+   - reports export

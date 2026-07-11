@@ -1,0 +1,106 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Delivery" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Delivery" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+<div class="orders-head orders-head--with-actions">
+  <div>
+    <h1 class="h1">{% trans "Delivery" %}</h1>
+    <p class="sub">{% trans "Manage delivery orders, drivers, and time slots." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'orders:delivery_calendar' %}">{% if LANGUAGE_CODE == "ar" %}التقويم{% else %}{% trans "Calendar" %}{% endif %}</a>
+    <a class="btn btn-outline" href="{% url 'orders:delivery_week' %}">{% if LANGUAGE_CODE == "ar" %}أسبوع{% else %}{% trans "Week" %}{% endif %}</a>
+    <a class="btn btn-outline" href="{% url 'orders:delivery_board' %}">{% if LANGUAGE_CODE == "ar" %}لوحة{% else %}{% trans "Board" %}{% endif %}</a>
+    <a class="btn btn-outline" href="{% url 'orders:delivery_export_csv' %}?q={{ q }}&status={{ status }}&branch={{ branch }}&date={{ date }}&driver={{ driver }}&zone={{ zone }}">{% if LANGUAGE_CODE == "ar" %}تصدير CSV{% else %}{% trans "Export CSV" %}{% endif %}</a>
+    <a class="btn btn-primary" target="_blank" href="{% url 'orders:delivery_route_link' %}?q={{ q }}&status={{ status }}&branch={{ branch }}&date={{ date }}&driver={{ driver }}&zone={{ zone }}">{% if LANGUAGE_CODE == "ar" %}رابط المسار{% else %}{% trans "Route Link" %}{% endif %}</a>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label>{% trans "Search" %}</label>
+    <input name="q" value="{{ q }}" placeholder="{% trans "Order #, phone, customer" %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Status" %}</label>
+    <select name="status">
+      <option value="">{% trans "All" %}</option>
+      {% for code,label in status_choices %}
+        <option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat..." %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Date" %}</label>
+    <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Driver" %}</label>
+    <input name="driver" value="{{ driver }}" placeholder="{% trans "Driver name" %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Zone" %}</label>
+    <input name="zone" value="{{ zone }}" placeholder="{% trans "Qurum..." %}" />
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Order" %}</th>
+          <th>{% trans "Customer" %}</th>
+          <th>{% trans "Branch" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th>{% trans "Driver" %}</th>
+          <th>{% trans "Zone" %}</th>
+          <th>{% trans "Slot" %}</th>
+          <th class="right">{% trans "Fee" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><a class="link" href="{% url 'orders:delivery_detail' o.order_no %}">#{{ o.order_no }}</a><div class="muted">{{ o.created_at }}</div></td>
+          <td>
+            <b>{{ o.customer.name|default:walk_in_label }}</b>
+            <div class="muted">{{ o.customer.phone|default:"" }}</div>
+          </td>
+          <td>{{ o.branch }}</td>
+          <td>
+            <span class="pill">{{ o.get_delivery_status_display }}</span>
+            {% if o.is_delayed %}<span class="badge-delay">{% trans "Delayed" %}</span>{% endif %}
+          </td>
+          <td>{{ o.delivery_driver_name|default:"-" }}</td>
+          <td>{{ o.delivery_zone|default:"-" }}</td>
+          <td>{{ o.delivery_slot|default:"-" }}</td>
+          <td class="right"><b>{{ o.delivery_fee }}</b></td>
+          <td class="right"><a class="btn-sm" href="{% url 'orders:delivery_detail' o.order_no %}">{% trans "Open" %}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="muted">{% trans "No delivery orders found." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

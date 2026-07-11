@@ -1,0 +1,67 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Customers" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Customers" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="orders-head customers-head">
+  <div>
+    <h1 class="h1">{% trans "Customers" %}</h1>
+    <p class="sub">{% trans "Search by name or phone. View history and loyalty." %}</p>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label>{% trans "Search" %}</label>
+    <input name="q" value="{{ q }}" placeholder="{% trans "Name or phone" %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "VIP" %}</label>
+    <select name="vip">
+      <option value="">{% trans "All" %}</option>
+      <option value="1" {% if vip %}selected{% endif %}>{% trans "VIP only" %}</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Name" %}</th>
+          <th>{% trans "Phone" %}</th>
+          <th>{% trans "VIP" %}</th>
+          <th class="right">{% trans "Points" %}</th>
+          <th class="right">{% trans "VIP %" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in customers %}
+        <tr>
+          <td><b>{{ c.name|default:"-" }}</b></td>
+          <td>{{ c.phone|default:"-" }}</td>
+          <td>{% if c.vip %}<span class="badge-urgent">{% trans "VIP" %}</span>{% else %}-{% endif %}</td>
+          <td class="right">{{ c.points }}</td>
+          <td class="right">{{ c.vip_discount_percent }}</td>
+          <td class="right"><a class="btn-sm" href="{% url 'orders:customer_detail' c.id %}">{% trans "Open" %}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="muted">{% trans "No customers found." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+@import url("/static/css/orders.css");
+
+.head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:16px; }
+.actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.h1{ margin:0; font-size:30px; letter-spacing:-.5px; color:#1B2A44; }
+.sub{ margin:6px 0 0; color:#64748B; font-weight:600; }
+
+.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+.list{ display:flex; flex-direction:column; gap:10px; }
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  border:1px solid #E7EEF7;
+  border-radius:12px;
+  padding:10px 12px;
+  background:#fff;
+}
+
+@media (max-width:1100px){
+  .grid{ grid-template-columns:1fr; }
+}

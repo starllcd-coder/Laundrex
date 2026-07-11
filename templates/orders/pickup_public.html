@@ -1,0 +1,49 @@
+{% extends "base_public.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Pickup Status" %} | Laundrex{% endblock %}
+
+{% block head %}
+<style>
+  body{ margin:0; font-family: "Times New Roman", Times, serif; background:#F8FAFC; color:#0B1220; }
+  .public-wrap{ max-width:520px; margin:40px auto; padding:24px; }
+  .h1{ font-size:26px; margin:0 0 6px; }
+  .sub{ color:#475569; margin:0; }
+  .card{ background:#fff; border:1px solid #E2E8F0; border-radius:12px; padding:16px; }
+  .kv{ display:grid; gap:10px; }
+  .kv div{ display:flex; justify-content:space-between; gap:10px; }
+  .kv span{ color:#64748B; }
+  .muted{ color:#64748B; }
+  .steps{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:16px; }
+  .step{ text-align:center; padding:8px 6px; border-radius:10px; background:#E2E8F0; color:#334155; font-size:12px; }
+  .step.active{ background:#0B1220; color:#fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="public-wrap">
+  {% if not_found %}
+    <h1 class="h1">{% trans "Order not found" %}</h1>
+    <p class="sub">{% trans "Please check the link or contact the branch." %}</p>
+  {% else %}
+    <h1 class="h1">{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}</h1>
+    <p class="sub">{% trans "Branch" %}: <b>{{ branch_name }}</b></p>
+    <div class="card" style="margin-top:16px;">
+      <div class="kv">
+        <div><span>{% trans "Status" %}</span><b>{{ order.get_status_display }}</b></div>
+        <div><span>{% trans "Amount Due" %}</span><b>{{ order.balance }}</b></div>
+        <div><span>{% trans "Pickup Code" %}</span><b>LAUNDREX:{{ order.order_no }}</b></div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step {% if order.status == 'RECEIVED' %}active{% endif %}">{% trans "Received" %}</div>
+      <div class="step {% if order.status == 'WASHING' %}active{% endif %}">{% trans "Washing" %}</div>
+      <div class="step {% if order.status == 'IRONING' %}active{% endif %}">{% trans "Ironing" %}</div>
+      <div class="step {% if order.status == 'READY' %}active{% endif %}">{% trans "Ready" %}</div>
+      <div class="step {% if order.status == 'DELIVERED' %}active{% endif %}">{% trans "Delivered" %}</div>
+    </div>
+    <p class="muted" style="margin-top:12px;">{% trans "Show your pickup code at the counter." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

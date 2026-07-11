@@ -1,0 +1,103 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "WhatsApp" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "WhatsApp Settings" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "WhatsApp" %}</h1>
+    <p class="sub">{% trans "Templates, toggles, and compliance settings." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'settings_app:home' %}">{% trans "Back" %}</a>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "General" %}</h2>
+  </div>
+  <form method="post" class="pay-form">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Enabled" %}</label>
+        <select name="enabled">
+          <option value="1" {% if settings_obj.enabled %}selected{% endif %}>{% trans "Yes" %}</option>
+          <option value="0" {% if not settings_obj.enabled %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label>{% trans "Manual Send" %}</label>
+        <select name="allow_manual_send">
+          <option value="1" {% if settings_obj.allow_manual_send %}selected{% endif %}>{% trans "Yes" %}</option>
+          <option value="0" {% if not settings_obj.allow_manual_send %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label>{% trans "Auto Send" %}</label>
+        <select name="allow_auto_send">
+          <option value="1" {% if settings_obj.allow_auto_send %}selected{% endif %}>{% trans "Yes" %}</option>
+          <option value="0" {% if not settings_obj.allow_auto_send %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label>{% trans "Sender Name (label)" %}</label>
+        <input name="sender_name" value="{{ settings_obj.sender_name }}" />
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="card-head">
+        <h2 class="card-title">{% trans "Templates" %}</h2>
+        <span class="muted">{% trans "Use approved template names from Meta Cloud API." %}</span>
+      </div>
+
+      {% for t in templates %}
+      <div class="card" style="margin-top:12px;">
+        <div class="card-head">
+          <h3 class="card-title">{{ t.name }}</h3>
+          <label class="check-inline">
+            <input type="checkbox" name="tpl_{{ t.id }}_enabled" value="1" {% if t.enabled %}checked{% endif %} />
+            {% trans "Enabled" %}
+          </label>
+        </div>
+
+        <div class="form-row">
+          <div class="field grow">
+            <label>{% trans "Template Name (EN)" %}</label>
+            <input name="tpl_{{ t.id }}_template_name_en" value="{{ t.template_name_en }}" placeholder="{% trans "order_received_en" %}" />
+          </div>
+          <div class="field grow">
+            <label>{% trans "Template Name (AR)" %}</label>
+            <input name="tpl_{{ t.id }}_template_name_ar" value="{{ t.template_name_ar }}" placeholder="{% trans "order_received_ar" %}" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field grow">
+            <label>{% trans "Body (EN)" %}</label>
+            <textarea name="tpl_{{ t.id }}_body_en" rows="3">{{ t.body_en }}</textarea>
+          </div>
+          <div class="field grow">
+            <label>{% trans "Body (AR)" %}</label>
+            <textarea name="tpl_{{ t.id }}_body_ar" rows="3">{{ t.body_ar }}</textarea>
+          </div>
+        </div>
+        <div class="muted">{% trans "Placeholders: {order_no} {total} {amount_due} {pickup_code} {branch} {pickup_link}" %}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mini-actions" style="margin-top:12px;">
+      <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

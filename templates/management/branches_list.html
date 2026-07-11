@@ -1,0 +1,80 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Branches" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Branches" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Branches" %}</h1>
+    <p class="sub">{% trans "Create and edit branches." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'management:home' %}">{% trans "Back" %}</a>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Add Branch" %}</h2>
+  </div>
+  <form method="post" class="pay-form">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Code" %}</label>
+        <input name="code" placeholder="{% trans "muscat" %}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Name" %}</label>
+        <input name="name" placeholder="{% trans "Muscat" %}" />
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" type="submit">{% trans "Add" %}</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Code" %}</th>
+          <th>{% trans "Name" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="right">{% trans "Tax %" %}</th>
+          <th class="right">{% trans "Max Discount %" %}</th>
+          <th>{% trans "Receipt" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in branches %}
+        <tr>
+          <td><b>{{ b.code }}</b></td>
+          <td>{{ b.name }}</td>
+          <td>{% if b.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}</td>
+          <td class="right">{{ b.tax_rate }}</td>
+          <td class="right">{{ b.max_discount_percent }}</td>
+          <td>
+            {% if b.receipt_template == "a4" %}{% trans "A4" %}{% else %}{% trans "80mm" %}{% endif %}
+            / {{ b.receipt_copies|default:"1" }}x
+          </td>
+          <td class="right"><a class="btn-sm" href="{% url 'management:branch_detail' b.id %}">{% trans "Edit" %}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="muted">{% trans "No branches found." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

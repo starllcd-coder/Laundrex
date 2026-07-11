@@ -1,0 +1,167 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% blocktrans with order_no=order.order_no %}Delivery #{{ order_no }}{% endblocktrans %} | Laundrex{% endblock %}
+{% block topbar_title %}{% blocktrans with order_no=order.order_no %}Delivery - #{{ order_no }}{% endblocktrans %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+<div class="orders-head orders-head--with-actions">
+  <div>
+    <h1 class="h1">{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}</h1>
+    <p class="sub">{% trans "Delivery details and driver assignment." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'orders:delivery_list' %}">{% trans "Back" %}</a>
+    <a class="btn btn-primary" href="{% url 'orders:detail' order.order_no %}">{% trans "Order" %}</a>
+  </div>
+</div>
+
+{% if info %}<div class="banner info">{{ info }}</div>{% endif %}
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Delivery Info" %}</h2>
+      <span class="muted">{% trans "Branch" %}: {{ order.branch }}</span>
+    </div>
+
+    <form method="post" class="pay-form" id="deliveryForm">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Delivery Required" %}</label>
+          <select name="delivery_required">
+            <option value="1" {% if order.delivery_required %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="0" {% if not order.delivery_required %}selected{% endif %}>{% trans "No" %}</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label>{% trans "Status" %}</label>
+          <select name="delivery_status">
+            {% for code,label in status_choices %}
+              <option value="{{ code }}" {% if order.delivery_status == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Address" %}</label>
+          <input name="delivery_address" value="{{ order.delivery_address }}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Zone" %}</label>
+          <input name="delivery_zone" value="{{ order.delivery_zone }}" placeholder="{% trans "Al Khuwair, Qurum..." %}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Phone" %}</label>
+          <input name="delivery_phone" value="{{ order.delivery_phone }}" />
+        </div>
+      </div>
+
+      <div class="mini-actions" style="margin-top:4px;">
+        <button class="btn btn-outline" type="button" id="useCustomerAddress">{% trans "Use Customer Address" %}</button>
+        <button class="btn btn-outline" type="button" id="useCustomerAddress2">{% trans "Use Address Line 2" %}</button>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Latitude" %}</label>
+          <input name="delivery_lat" value="{{ order.delivery_lat|default:"" }}" placeholder="23.5880" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Longitude" %}</label>
+          <input name="delivery_lng" value="{{ order.delivery_lng|default:"" }}" placeholder="58.3829" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Time Slot" %}</label>
+          <input name="delivery_slot" value="{{ order.delivery_slot }}" placeholder="{% trans "Today 4-6 PM" %}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Delivery Fee (OMR)" %}</label>
+          <input name="delivery_fee" type="number" step="0.001" min="0" value="{{ order.delivery_fee }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Driver Name" %}</label>
+          <input name="delivery_driver_name" value="{{ order.delivery_driver_name }}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Driver Phone" %}</label>
+          <input name="delivery_driver_phone" value="{{ order.delivery_driver_phone }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Notes" %}</label>
+          <input name="delivery_notes" value="{{ order.delivery_notes }}" placeholder="{% trans "Leave at reception" %}" />
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="submit">{% trans "Save Delivery" %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Order Summary" %}</h2>
+      <span class="muted">{% trans "Updated" %}: {{ order.updated_at }}</span>
+    </div>
+    <div class="kv">
+      <div><span>{% trans "Customer" %}</span><b>{{ order.customer.name|default:walk_in_label }}</b></div>
+      <div><span>{% trans "Phone" %}</span><b>{{ order.customer.phone|default:"-" }}</b></div>
+      <div><span>{% trans "Status" %}</span><b>{{ order.get_status_display }}</b></div>
+      <div><span>{% trans "Zone" %}</span><b>{{ order.delivery_zone|default:"-" }}</b></div>
+      {% if order.delivery_lat and order.delivery_lng %}
+      <div><span>{% trans "Coordinates" %}</span><b>{{ order.delivery_lat }}, {{ order.delivery_lng }}</b></div>
+      {% endif %}
+      {% if order.delivery_address %}
+      <div><span>{% trans "Map" %}</span><b><a class="link" target="_blank" href="https://www.google.com/maps/search/?api=1&query={{ order.delivery_address|urlencode }}">{% trans "Open Map" %}</a></b></div>
+      {% endif %}
+      <div><span>{% trans "Total" %}</span><b>{{ order.total }}</b></div>
+      <div><span>{% trans "Paid" %}</span><b>{{ order.paid }}</b></div>
+      <div><span>{% trans "Amount Due" %}</span><b class="{% if order.balance > 0 %}neg{% endif %}">{{ order.balance }}</b></div>
+      <div><span>{% trans "Delivered At" %}</span><b>{{ order.delivered_at|default:"-" }}</b></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const btn = document.getElementById("useCustomerAddress");
+    const btn2 = document.getElementById("useCustomerAddress2");
+    if(!btn) return;
+    btn.addEventListener("click", () => {
+      const form = document.getElementById("deliveryForm");
+      if(!form) return;
+      const addr = "{{ order.customer.address|default:''|escapejs }}";
+      const addr2 = "{{ order.customer.address2|default:''|escapejs }}";
+      const full = (addr2 && addr) ? (addr + ", " + addr2) : (addr || addr2);
+      form.querySelector("[name=delivery_address]").value = full;
+    });
+    if(btn2){
+      btn2.addEventListener("click", () => {
+        const form = document.getElementById("deliveryForm");
+        if(!form) return;
+        const addr2 = "{{ order.customer.address2|default:''|escapejs }}";
+        form.querySelector("[name=delivery_address]").value = addr2;
+      });
+    }
+  })();
+</script>
+{% endblock %}

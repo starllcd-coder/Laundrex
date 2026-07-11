@@ -1,0 +1,39 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Sync Status" %}</h1>
+
+<div class="module">
+  <table>
+    <tr>
+      <th>{% trans "Last Synced At" %}</th>
+      <td>{{ last_synced_at|default:"-" }}</td>
+    </tr>
+  </table>
+</div>
+
+<div class="module">
+  <h2>{% trans "Recent Sync Conflicts" %}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>{% trans "Time" %}</th>
+        <th>{% trans "Message" %}</th>
+        <th>{% trans "Branch" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.created_at }}</td>
+        <td>{{ log.message }}</td>
+        <td>{{ log.branch_code|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">{% trans "No sync conflicts logged." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

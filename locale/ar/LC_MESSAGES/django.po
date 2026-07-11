@@ -1,0 +1,1334 @@
+msgid ""
+msgstr ""
+"Language: ar\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=6; plural=(n==0?0:n==1?1:n==2?2:n%100>=3 && n%100<=10?3:n%100>=11 && n%100<=99?4:5);\n"
+
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+msgid "Overview"
+msgstr "نظرة عامة"
+
+msgid "Branch"
+msgstr "الفرع"
+
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+msgid "Orders"
+msgstr "الطلبات"
+
+msgid "Order"
+msgstr "طلب"
+
+msgid "Order #%(order_no)s"
+msgstr "طلب رقم %(order_no)s"
+
+msgid "Customers"
+msgstr "العملاء"
+
+msgid "Customer"
+msgstr "العميل"
+
+msgid "POS"
+msgstr "نقطة البيع"
+msgid "Cashier"
+msgstr "الكاشير"
+
+msgid "POS - New Order"
+msgstr "نقطة البيع - طلب جديد"
+
+msgid "New Order"
+msgstr "طلب جديد"
+msgid "Mark Urgent"
+msgstr "وضع عاجل"
+msgid "Clear Urgent"
+msgstr "إزالة عاجل"
+
+msgid "View Orders"
+msgstr "عرض الطلبات"
+
+msgid "Save Order"
+msgstr "حفظ الطلب"
+msgid "Opt-in"
+msgstr "مفعل"
+msgid "Number"
+msgstr "الرقم"
+
+msgid "Save & Print"
+msgstr "حفظ وطباعة"
+
+msgid "Clear"
+msgstr "مسح"
+
+msgid "Back"
+msgstr "رجوع"
+
+msgid "Open"
+msgstr "فتح"
+
+msgid "Open Catalog"
+msgstr "فتح الكتالوج"
+
+msgid "Open Management"
+msgstr "فتح الإدارة"
+
+msgid "Sync Settings"
+msgstr "إعدادات المزامنة"
+
+msgid "Open Admin"
+msgstr "فتح لوحة الإدارة"
+
+msgid "Admin Panel"
+msgstr "لوحة الإدارة"
+
+msgid "Settings"
+msgstr "الإعدادات"
+
+msgid "Management"
+msgstr "الإدارة"
+
+msgid "Reports"
+msgstr "التقارير"
+
+msgid "Payments"
+msgstr "المدفوعات"
+
+msgid "Delivery"
+msgstr "التوصيل"
+
+msgid "Pickup"
+msgstr "الاستلام"
+
+msgid "Pickup Counter"
+msgstr "كاونتر الاستلام"
+
+msgid "Search"
+msgstr "بحث"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid "All"
+msgstr "الكل"
+
+msgid "Apply"
+msgstr "تطبيق"
+
+msgid "Name"
+msgstr "الاسم"
+
+msgid "Phone"
+msgstr "الهاتف"
+
+msgid "Notes"
+msgstr "ملاحظات"
+
+msgid "Today Orders"
+msgstr "طلبات اليوم"
+
+msgid "Live"
+msgstr "مباشر"
+
+msgid "Orders created today"
+msgstr "الطلبات التي تم إنشاؤها اليوم"
+
+msgid "Pending Orders"
+msgstr "طلبات معلقة"
+
+msgid "Not yet completed"
+msgstr "لم تكتمل بعد"
+
+msgid "Ready for Pickup"
+msgstr "جاهز للاستلام"
+
+msgid "Ready to deliver"
+msgstr "جاهز للتسليم"
+
+msgid "Today Sales"
+msgstr "مبيعات اليوم"
+
+msgid "Total received today"
+msgstr "إجمالي المحصل اليوم"
+
+msgid "Orders by Status"
+msgstr "الطلبات حسب الحالة"
+
+msgid "Open board"
+msgstr "فتح اللوحة"
+
+msgid "Recent Activity"
+msgstr "النشاط الأخير"
+
+msgid "Last 10 actions"
+msgstr "آخر 10 إجراءات"
+
+msgid "Order #1042 created"
+msgstr "تم إنشاء الطلب رقم 1042"
+
+msgid "Customer: +968 9xxx xxxx"
+msgstr "العميل: +968 9xxx xxxx"
+
+msgid "Just now"
+msgstr "الآن"
+
+msgid "Payment received"
+msgstr "تم استلام الدفع"
+
+msgid "Order #1039 • Cash"
+msgstr "الطلب رقم 1039 • نقداً"
+
+msgid "10 min"
+msgstr "10 دقائق"
+
+msgid "Order marked Ready"
+msgstr "تم وضع الطلب كجاهز"
+
+msgid "Order #1038"
+msgstr "الطلب رقم 1038"
+
+msgid "22 min"
+msgstr "22 دقيقة"
+
+msgid "Created"
+msgstr "تم الإنشاء"
+
+msgid "Updated"
+msgstr "تم التحديث"
+
+msgid "Totals"
+msgstr "الإجماليات"
+
+msgid "Subtotal"
+msgstr "الإجمالي الفرعي"
+
+msgid "Discount"
+msgstr "خصم"
+
+msgid "Tax"
+msgstr "الضريبة"
+
+msgid "Total"
+msgstr "الإجمالي"
+
+msgid "Paid"
+msgstr "المدفوع"
+
+msgid "Amount Due"
+msgstr "المتبقي"
+
+msgid "Unpaid"
+msgstr "غير مدفوع"
+
+msgid "Urgent"
+msgstr "عاجل"
+
+msgid "Next"
+msgstr "التالي"
+
+msgid "Reprint"
+msgstr "إعادة الطباعة"
+
+msgid "Reprint Receipt"
+msgstr "إعادة طباعة الإيصال"
+
+msgid "History"
+msgstr "السجل"
+
+msgid "Status and payments"
+msgstr "الحالات والمدفوعات"
+
+msgid "Time"
+msgstr "الوقت"
+
+msgid "Type"
+msgstr "النوع"
+
+msgid "Details"
+msgstr "التفاصيل"
+
+msgid "User"
+msgstr "المستخدم"
+
+msgctxt "payment_section"
+msgid "Payment"
+msgstr "الدفع"
+
+msgctxt "payment_record"
+msgid "Payment"
+msgstr "دفعة"
+
+msgid "No history yet."
+msgstr "لا يوجد سجل بعد."
+
+msgid "Items"
+msgstr "العناصر"
+
+msgid "Item"
+msgstr "الصنف"
+
+msgid "Service"
+msgstr "الخدمة"
+
+msgid "Qty"
+msgstr "الكمية"
+
+msgid "Price"
+msgstr "السعر"
+
+msgid "Line Total"
+msgstr "الإجمالي"
+
+msgid "No items."
+msgstr "لا توجد عناصر."
+
+msgid "Yes"
+msgstr "نعم"
+
+msgid "No"
+msgstr "لا"
+
+msgid "Cancel Order"
+msgstr "إلغاء الطلب"
+
+msgid "Move to"
+msgstr "الانتقال إلى"
+
+msgid "Delivery Info"
+msgstr "معلومات التوصيل"
+
+msgid "Delivery Required"
+msgstr "يتطلب توصيل"
+
+msgid "Address"
+msgstr "العنوان"
+
+msgid "Time Slot"
+msgstr "الوقت"
+
+msgid "Delivery Fee (OMR)"
+msgstr "رسوم التوصيل (ر.ع)"
+
+msgid "Required"
+msgstr "مطلوب"
+
+msgid "Slot"
+msgstr "الوقت"
+
+msgid "Fee"
+msgstr "الرسوم"
+
+msgid "Driver"
+msgstr "السائق"
+
+msgid "Driver Name"
+msgstr "اسم السائق"
+
+msgid "Driver Phone"
+msgstr "هاتف السائق"
+
+msgid "Save Delivery"
+msgstr "حفظ التوصيل"
+
+msgid "Order Summary"
+msgstr "ملخص الطلب"
+
+msgid "Delivered At"
+msgstr "وقت التسليم"
+
+msgid "Pickup Status"
+msgstr "حالة الاستلام"
+
+msgid "Pickup Code"
+msgstr "رمز الاستلام"
+
+msgid "Order not found"
+msgstr "الطلب غير موجود"
+
+msgid "Please check the link or contact the branch."
+msgstr "يرجى التحقق من الرابط أو التواصل مع الفرع."
+
+msgid "Show your pickup code at the counter."
+msgstr "اعرض رمز الاستلام عند الكاونتر."
+
+msgid "Start date"
+msgstr "تاريخ البداية"
+
+msgid "End date"
+msgstr "تاريخ النهاية"
+
+msgid "Count"
+msgstr "العدد"
+
+msgid "Revenue"
+msgstr "الإيرادات"
+
+msgid "Outstanding"
+msgstr "المتبقي"
+
+msgid "Recent Payments"
+msgstr "المدفوعات الأخيرة"
+
+msgid "Recent Orders (Preview)"
+msgstr "آخر الطلبات (معاينة)"
+
+msgid "Top 30"
+msgstr "أفضل 30"
+
+msgid "Top 200"
+msgstr "أفضل 200"
+
+msgid "No orders found."
+msgstr "لا توجد طلبات."
+
+msgid "No payments found."
+msgstr "لا توجد مدفوعات."
+
+msgid "No payments yet."
+msgstr "لا توجد مدفوعات بعد."
+
+msgid "Login"
+msgstr "تسجيل الدخول"
+
+msgid "Smart Laundry. Simplified."
+msgstr "غسيل ذكي. ببساطة."
+
+msgid "WhatsApp"
+msgstr "واتساب"
+
+msgid "WhatsApp Settings"
+msgstr "إعدادات واتساب"
+
+msgid "Manual send"
+msgstr "إرسال يدوي"
+
+msgid "Send WhatsApp"
+msgstr "إرسال واتساب"
+
+msgid "Select template"
+msgstr "اختر القالب"
+
+msgid "Template"
+msgstr "القالب"
+
+msgid "Message"
+msgstr "الرسالة"
+
+msgid "Actions"
+msgstr "الإجراءات"
+
+msgid "Retry"
+msgstr "إعادة المحاولة"
+
+msgid "No messages yet."
+msgstr "لا توجد رسائل بعد."
+
+msgid "Language"
+msgstr "اللغة"
+
+msgid "English"
+msgstr "الإنجليزية"
+
+msgid "Arabic"
+msgstr "العربية"
+
+msgid "Preferred Language"
+msgstr "اللغة المفضلة"
+
+msgid "VIP"
+msgstr "عميل مميز"
+
+msgid "Points"
+msgstr "النقاط"
+
+msgid "Loyalty"
+msgstr "الولاء"
+
+msgid "Order History"
+msgstr "سجل الطلبات"
+
+msgid "Staff"
+msgstr "الموظفون"
+
+msgid "Users & Roles"
+msgstr "المستخدمون والأدوار"
+
+msgid "Audit Logs"
+msgstr "سجلات التدقيق"
+
+msgid "Configure WhatsApp"
+msgstr "تهيئة واتساب"
+
+msgid "Z Report"
+msgstr "تقرير Z"
+
+msgid "Print"
+msgstr "طباعة"
+
+msgid "Walk-in"
+msgstr "زبون مباشر"
+
+msgid "Orders Kanban"
+msgstr "كانبان الطلبات"
+
+msgid "List"
+msgstr "قائمة"
+
+msgid "Flags"
+msgstr "العلامات"
+
+msgid "Received"
+msgstr "تم الاستلام"
+
+msgid "Washing"
+msgstr "الغسيل"
+
+msgid "Ironing"
+msgstr "الكي"
+
+msgid "Ready"
+msgstr "جاهز"
+
+msgid "Delivered"
+msgstr "تم التسليم"
+
+msgid "Cancelled"
+msgstr "ملغي"
+
+msgid "Order No / QR"
+msgstr "رقم الطلب / QR"
+
+msgid "Lookup"
+msgstr "بحث"
+
+msgid "Mark Ready"
+msgstr "وضع جاهز"
+
+msgid "Mark Delivered"
+msgstr "وضع مُسلَّم"
+
+msgid "Collect Payment"
+msgstr "تحصيل دفعة"
+
+msgid "Amount (OMR)"
+msgstr "المبلغ (ر.ع)"
+
+msgid "Method"
+msgstr "الطريقة"
+
+msgid "Reference"
+msgstr "المرجع"
+
+msgid "Optional"
+msgstr "اختياري"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Edit"
+msgstr "تعديل"
+
+msgid "Apply VIP discount"
+msgstr "تطبيق خصم VIP"
+
+msgid "Barcode"
+msgstr "الباركود"
+
+msgid "Add Items"
+msgstr "إضافة عناصر"
+
+msgid "Add to Order"
+msgstr "إضافة للطلب"
+
+msgid "Order Items"
+msgstr "عناصر الطلب"
+
+msgid "Summary"
+msgstr "الملخص"
+
+msgid "Cash"
+msgstr "نقداً"
+
+msgid "Card"
+msgstr "بطاقة"
+
+msgid "Wallet"
+msgstr "محفظة"
+
+msgid "Bank Transfer"
+msgstr "تحويل بنكي"
+
+msgid "Complete Order"
+msgstr "إتمام الطلب"
+
+msgid "Hold"
+msgstr "تعليق"
+
+msgid "Services"
+msgstr "الخدمات"
+
+msgid "Items & Pricing"
+msgstr "الأصناف والأسعار"
+
+msgid "Barcode Mapping"
+msgstr "ربط الباركود"
+
+msgid "Tax, Discounts & Currency"
+msgstr "الضرائب والخصومات والعملة"
+
+msgid "VIP Discount"
+msgstr "خصم VIP"
+
+msgid "Currency"
+msgstr "العملة"
+
+msgid "System"
+msgstr "النظام"
+
+msgid "Receipt Template"
+msgstr "قالب الإيصال"
+
+msgid "Users"
+msgstr "المستخدمون"
+
+msgid "About"
+msgstr "حول"
+
+msgid "Support"
+msgstr "الدعم"
+
+msgid "Product support and company contact details."
+msgstr "دعم المنتج وبيانات التواصل مع الشركة."
+
+msgid "Developed by"
+msgstr "تم التطوير بواسطة"
+
+msgid "Call"
+msgstr "اتصال"
+
+msgid "Recommended Next Setup"
+msgstr "الإعداد الموصى به التالي"
+
+msgid "Wash / Iron / Dry"
+msgstr "غسيل / كي / تنظيف جاف"
+
+msgid "Manage available services for POS and pricing rules."
+msgstr "إدارة الخدمات المتاحة لنقطة البيع وقواعد التسعير."
+
+msgid "Wash"
+msgstr "غسيل"
+
+msgid "Enabled"
+msgstr "مفعل"
+
+msgid "Wash + Iron"
+msgstr "غسيل + كي"
+
+msgid "Iron"
+msgstr "كي"
+
+msgid "Dry Clean"
+msgstr "تنظيف جاف"
+
+msgid "Edit Services"
+msgstr "تعديل الخدمات"
+
+msgid "Catalog"
+msgstr "الكتالوج"
+
+msgid "From 0.500 OMR"
+msgstr "ابتداءً من 0.500 ر.ع"
+
+msgid "From 0.600 OMR"
+msgstr "ابتداءً من 0.600 ر.ع"
+
+msgid "From 1.000 OMR"
+msgstr "ابتداءً من 1.000 ر.ع"
+
+msgid "From 1.200 OMR"
+msgstr "ابتداءً من 1.200 ر.ع"
+
+msgid "Open Items & Prices"
+msgstr "فتح الأصناف والأسعار"
+
+msgid "Edit Prices (Admin)"
+msgstr "تعديل الأسعار (الإدارة)"
+
+msgid "Scanner"
+msgstr "الماسح"
+
+msgid "Map barcode → item for quick entry. POS uses this to auto-select item."
+msgstr "ربط الباركود بالصنف لإدخال سريع. تستخدم نقطة البيع هذا للاختيار التلقائي للصنف."
+
+msgid "Shirt"
+msgstr "قميص"
+
+msgid "Pant"
+msgstr "بنطال"
+
+msgid "Kandura"
+msgstr "كندورة"
+
+msgid "Abaya"
+msgstr "عباءة"
+
+msgid "Manage Barcodes"
+msgstr "إدارة الباركود"
+
+msgid "Barcode Admin"
+msgstr "إدارة الباركود (الإدارة)"
+
+msgid "Default Tax"
+msgstr "الضريبة الافتراضية"
+
+msgid "Manual / Rule later"
+msgstr "يدوي / قاعدة لاحقاً"
+
+msgid "Configure (Next)"
+msgstr "تهيئة (لاحقاً)"
+
+msgid "OMR"
+msgstr "ر.ع"
+
+msgid "EN / AR"
+msgstr "إنجليزي / عربي"
+
+msgid "Default"
+msgstr "افتراضي"
+
+msgid "Next phase"
+msgstr "المرحلة التالية"
+
+msgid "Enable Arabic (Later)"
+msgstr "تفعيل العربية (لاحقاً)"
+
+msgid "Security"
+msgstr "الأمان"
+
+msgid "Quick checklist"
+msgstr "قائمة سريعة"
+
+msgid "Seed Catalog Defaults"
+msgstr "إنشاء بيانات الكتالوج الافتراضية"
+
+msgid "Update Prices"
+msgstr "تحديث الأسعار"
+
+msgid "Barcode Test"
+msgstr "اختبار الباركود"
+
+msgid "Print Test"
+msgstr "اختبار الطباعة"
+
+msgid "POS → scan “S001” → should select Shirt automatically."
+msgstr "نقطة البيع → امسح “S001” → يجب اختيار القميص تلقائياً."
+
+msgid "POS → Save & Print → verify receipt format for 80mm printer."
+msgstr "نقطة البيع → حفظ وطباعة → تحقق من تنسيق الإيصال لطابعة 80mm."
+
+msgid "80mm"
+msgstr "80مم"
+
+msgid "Fast checkout • Barcode ready • Thermal print"
+msgstr "دفع سريع • جاهز للباركود • طباعة حرارية"
+
+msgid "Search by phone or name"
+msgstr "ابحث بالهاتف أو الاسم"
+
+msgid "Customer name"
+msgstr "اسم العميل"
+
+msgid "Find"
+msgstr "بحث"
+
+msgid "New Customer"
+msgstr "عميل جديد"
+
+msgid "Scan barcode or choose item"
+msgstr "امسح الباركود أو اختر العنصر"
+
+msgid "Scan barcode here..."
+msgstr "امسح الباركود هنا..."
+
+msgid "Loading items..."
+msgstr "جار تحميل العناصر..."
+
+msgid "Price (OMR)"
+msgstr "السعر (ر.ع)"
+
+msgid "items"
+msgstr "عناصر"
+
+msgid "Redeem Points"
+msgstr "استبدال النقاط"
+
+msgid "Choose method"
+msgstr "اختر الطريقة"
+
+msgid "Paid (OMR)"
+msgstr "المدفوع (ر.ع)"
+
+msgid "Special instructions..."
+msgstr "تعليمات خاصة..."
+
+msgid "Track, update status, and reprint receipts."
+msgstr "تتبع الحالات وتحديثها وإعادة طباعة الإيصالات."
+
+msgid "Order #, phone, customer"
+msgstr "رقم الطلب، الهاتف، العميل"
+
+msgid "muscat..."
+msgstr "مسقط..."
+
+msgid "muscat"
+msgstr "مسقط"
+
+msgid "Scan QR or type Order # to prepare or hand over orders."
+msgstr "امسح رمز QR أو اكتب رقم الطلب لتحضير الطلبات أو تسليمها."
+
+msgid "LAUNDREX:1042 or 1042"
+msgstr "LAUNDREX:1042 أو 1042"
+
+msgid "Order marked Delivered"
+msgstr "تم وضع الطلب كمُسلَّم"
+
+msgid "Enter a payment amount"
+msgstr "أدخل مبلغ الدفع"
+
+msgid "Enter a valid payment amount"
+msgstr "أدخل مبلغ دفع صحيح"
+
+msgid "Payment added"
+msgstr "تمت إضافة الدفع"
+
+msgid "View paid / outstanding amounts by order."
+msgstr "عرض المدفوع والمتبقي حسب الطلب."
+
+msgid "Manage delivery orders, drivers, and time slots."
+msgstr "إدارة طلبات التوصيل والسائقين والأوقات."
+
+msgid "Driver name"
+msgstr "اسم السائق"
+
+msgid "Delivery details and driver assignment."
+msgstr "تفاصيل التوصيل وتعيين السائق."
+
+msgid "Open Delivery"
+msgstr "فتح التوصيل"
+
+msgid "Only if there is remaining balance"
+msgstr "فقط إذا كان هناك رصيد متبقٍ"
+
+msgid "Txn ID / bank ref"
+msgstr "رقم العملية / مرجع البنك"
+
+msgid "Daily closing summary by payment method."
+msgstr "ملخص الإغلاق اليومي حسب طريقة الدفع."
+
+msgid "Filter by date range and branch. Print-friendly."
+msgstr "تصفية حسب المدة والفرع. مناسب للطباعة."
+
+msgid "Total amount"
+msgstr "إجمالي المبلغ"
+
+msgid "Total sales"
+msgstr "إجمالي المبيعات"
+
+msgid "Collected"
+msgstr "المحصل"
+
+msgid "Filtered"
+msgstr "مصفى"
+
+msgid "No data."
+msgstr "لا توجد بيانات."
+
+msgid "No recent orders."
+msgstr "لا توجد طلبات حديثة."
+
+msgid "No delivery orders found."
+msgstr "لا توجد طلبات توصيل."
+
+msgid "No orders yet. Create one from POS."
+msgstr "لا توجد طلبات بعد. أنشئ طلباً من نقطة البيع."
+
+msgid "No staff found."
+msgstr "لا يوجد موظفون."
+
+msgid "No logs found."
+msgstr "لا توجد سجلات."
+
+msgid "Order #, user, message"
+msgstr "رقم الطلب، المستخدم، الرسالة"
+
+msgid "status_change"
+msgstr "تغيير الحالة"
+
+msgid "Payment Summary"
+msgstr "ملخص الدفع"
+
+msgid "Add Payment"
+msgstr "إضافة دفع"
+
+msgid "Payment History"
+msgstr "سجل المدفوعات"
+
+msgid "Branch Management"
+msgstr "إدارة الفروع"
+
+msgid "Create branches, set tax and discount rules."
+msgstr "إنشاء الفروع وتحديد الضرائب والخصومات."
+
+msgid "No branches"
+msgstr "لا توجد فروع"
+
+msgid "Add a branch"
+msgstr "أضف فرعاً"
+
+msgid "Manage Branches"
+msgstr "إدارة الفروع"
+
+msgid "Roles"
+msgstr "الأدوار"
+
+msgid "Control permissions: Admin / Manager / Cashier / Worker."
+msgstr "التحكم في الصلاحيات: إدارة / مدير / كاشير / عامل."
+
+msgid "No users"
+msgstr "لا يوجد مستخدمون"
+
+msgid "Create in admin"
+msgstr "أنشئ في لوحة الإدارة"
+
+msgid "Manage Staff"
+msgstr "إدارة الموظفين"
+
+msgid "Admin Users"
+msgstr "مستخدمو الإدارة"
+
+msgid "Track price edits, payments, status changes, and delivery updates."
+msgstr "تتبع تعديلات الأسعار والمدفوعات وتغييرات الحالة وتحديثات التوصيل."
+
+msgid "Open Logs"
+msgstr "فتح السجلات"
+
+msgid "Thermal Printers"
+msgstr "طابعات حرارية"
+
+msgid "Assign printer per branch, test print, paper size and margins."
+msgstr "تعيين طابعة لكل فرع واختبار الطباعة وحجم الورق والهوامش."
+
+msgid "Not configured"
+msgstr "غير مُهيأ"
+
+msgid "Configure"
+msgstr "تهيئة"
+
+msgid "Test Print"
+msgstr "اختبار الطباعة"
+
+msgid "Barcode Setup"
+msgstr "إعداد الباركود"
+
+msgid "Map barcode → item, auto price from Services/Items (Catalog)."
+msgstr "ربط الباركود بالصنف وتحديد السعر تلقائياً من الخدمات/الأصناف (الكتالوج)."
+
+msgid "Next Implementation Plan"
+msgstr "خطة التنفيذ القادمة"
+
+msgid "Roadmap"
+msgstr "خريطة الطريق"
+
+msgid "Branch model + staff assignment + branch scope."
+msgstr "نموذج الفروع + تعيين الموظفين + نطاق الفرع."
+
+msgid "Groups + permissions for discounts, refunds, delivery, reports."
+msgstr "مجموعات وصلاحيات للخصومات والاسترجاع والتوصيل والتقارير."
+
+msgid "Printer Settings"
+msgstr "إعدادات الطابعة"
+
+msgid "Store printer name, header/footer, auto print on complete."
+msgstr "حفظ اسم الطابعة والرأس/التذييل والطباعة التلقائية عند الإتمام."
+
+msgid "Barcode + Catalog Full"
+msgstr "الباركود + الكتالوج بالكامل"
+
+msgid "Barcode scanning + item/service pricing auto-fill + branch pricing."
+msgstr "مسح الباركود + تعبئة أسعار الأصناف/الخدمات تلقائياً + تسعير حسب الفرع."
+
+msgid "Create and edit branches."
+msgstr "إنشاء الفروع وتعديلها."
+
+msgid "Add Branch"
+msgstr "إضافة فرع"
+
+msgid "Tax %"
+msgstr "الضريبة %"
+
+msgid "Max Discount %"
+msgstr "أقصى خصم %"
+
+msgid "Receipt"
+msgstr "الإيصال"
+
+msgid "Tax Rate (%)"
+msgstr "نسبة الضريبة (%)"
+
+msgid "Allow Discounts"
+msgstr "السماح بالخصومات"
+
+msgid "Receipt Header"
+msgstr "رأس الإيصال"
+
+msgid "Receipt Footer"
+msgstr "تذييل الإيصال"
+
+msgid "Laundrex - Muscat"
+msgstr "لوندريكس - مسقط"
+
+msgid "Thank you"
+msgstr "شكراً لك"
+
+msgid "VAT Number"
+msgstr "الرقم الضريبي"
+
+msgid "Printer Name"
+msgstr "اسم الطابعة"
+
+msgid "POS-Printer-01"
+msgstr "POS-Printer-01"
+
+msgid "Receipt Copies"
+msgstr "نسخ الإيصال"
+
+msgid "Assign branches and roles."
+msgstr "تعيين الفروع والأدوار."
+
+msgid "Username or email"
+msgstr "اسم المستخدم أو البريد الإلكتروني"
+
+msgid "Override"
+msgstr "تجاوز"
+
+msgid "Groups"
+msgstr "المجموعات"
+
+msgid "Assign branch and role groups."
+msgstr "تعيين الفرع ومجموعات الأدوار."
+
+msgid "Assignment"
+msgstr "التعيين"
+
+msgid "Override Branch"
+msgstr "تجاوز الفرع"
+
+msgid "Groups (Roles)"
+msgstr "المجموعات (الأدوار)"
+
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+msgid "Pending"
+msgstr "قيد الانتظار"
+
+msgid "Assigned"
+msgstr "تم التعيين"
+
+msgid "Out for delivery"
+msgstr "خارج للتوصيل"
+
+msgid "Failed"
+msgstr "فشل"
+
+msgid "A4"
+msgstr "A4"
+
+msgid "Please enter a valid order number"
+msgstr "يرجى إدخال رقم طلب صحيح"
+
+msgid "Order #%(order_no)s not found"
+msgstr "الطلب رقم %(order_no)s غير موجود"
+
+msgid "Not allowed"
+msgstr "غير مسموح"
+
+msgid "POST required"
+msgstr "يتطلب POST"
+
+msgid "Invalid status"
+msgstr "حالة غير صالحة"
+
+msgid "No customer"
+msgstr "لا يوجد عميل"
+
+msgid "Invalid log"
+msgstr "سجل غير صالح"
+
+msgid "Retry limit reached"
+msgstr "تم الوصول لحد المحاولات"
+
+msgid "Delivery updated"
+msgstr "تم تحديث التوصيل"
+
+msgid "%(status)s fee %(fee)s"
+msgstr "%(status)s رسوم %(fee)s"
+
+msgid "Date"
+msgstr "التاريخ"
+
+msgid "Kanban"
+msgstr "كانبان"
+
+msgid "Search by name or phone. View history and loyalty."
+msgstr "ابحث بالاسم أو الهاتف. اعرض السجل والولاء."
+
+msgid "Name or phone"
+msgstr "الاسم أو الهاتف"
+
+msgid "No customers found."
+msgstr "لا يوجد عملاء."
+
+msgid "Branches, users & roles, printers and barcode setup."
+msgstr "الفروع والمستخدمون والأدوار والطابعات وإعداد الباركود."
+
+msgid "Master data, pricing, tax, language and system preferences."
+msgstr "البيانات الرئيسية والتسعير والضرائب واللغة وتفضيلات النظام."
+
+msgid "Item list and price per service. POS can auto-fill price from catalog."
+msgstr "قائمة الأصناف وسعر كل خدمة. يمكن لنقطة البيع تعبئة السعر تلقائياً من الكتالوج."
+
+msgid "Set default VAT/tax rules and discount rules."
+msgstr "تعيين قواعد ضريبة القيمة المضافة/الضريبة وقواعد الخصم."
+
+msgid "Enable Arabic UI later (RTL). Language selector is already in login screen."
+msgstr "تفعيل واجهة العربية لاحقاً (RTL). اختيار اللغة موجود بالفعل في شاشة الدخول."
+
+msgid "Backups, users, permissions, receipt header/footer, printer settings."
+msgstr "النسخ الاحتياطي والمستخدمون والصلاحيات ورأس/تذييل الإيصال وإعدادات الطابعة."
+
+msgid "Catalog API error"
+msgstr "خطأ في واجهة الكتالوج"
+
+msgid "Select item"
+msgstr "اختر العنصر"
+
+msgid "Please select an item"
+msgstr "يرجى اختيار عنصر"
+
+msgid "All Reports"
+msgstr "?? ????????"
+
+msgid "Sales & Revenue Reports"
+msgstr "?????? ???????? ??????????"
+
+msgid "Orders & Operations Reports"
+msgstr "?????? ??????? ?????????"
+
+msgid "Customer Reports"
+msgstr "?????? ???????"
+
+msgid "Delivery & Logistics Reports"
+msgstr "?????? ??????? ???????????"
+
+msgid "Expense & Profit Reports"
+msgstr "?????? ???????? ????????"
+
+msgid "Staff Performance Reports"
+msgstr "?????? ???? ????????"
+
+msgid "Issue & Quality Reports"
+msgstr "?????? ??????? ???????"
+
+msgid "Export PDF"
+msgstr "????? PDF"
+
+msgid "Export Excel"
+msgstr "????? Excel"
+
+msgid "Export CSV"
+msgstr "????? CSV"
+
+msgid "Generated at"
+msgstr "?? ??????? ??"
+
+msgid "Report Type"
+msgstr "??? ???????"
+
+msgid "Period"
+msgstr "??????"
+
+msgid "Custom Range"
+msgstr "???? ?????"
+
+msgid "Weekly"
+msgstr "??????"
+
+msgid "Monthly"
+msgstr "????"
+
+msgid "Selected report type controls CSV/Excel/PDF export content. On-screen dashboard remains comprehensive."
+msgstr "??? ??????? ?????? ???? ????? ??????? CSV/Excel/PDF. ???? ????? ??? ?????? ???? ?????."
+
+msgid "Branch-aware summary"
+msgstr "???? ??? ?????"
+
+msgid "Performance"
+msgstr "??????"
+
+msgid "Daily Revenue"
+msgstr "????? ?????"
+
+msgid "Weekly Revenue"
+msgstr "????? ???????"
+
+msgid "Monthly Revenue"
+msgstr "????? ?????"
+
+msgid "Avg Order Value"
+msgstr "????? ???? ?????"
+
+msgid "Per order"
+msgstr "??? ???"
+
+msgid "Today"
+msgstr "?????"
+
+msgid "This week"
+msgstr "??? ???????"
+
+msgid "This month"
+msgstr "??? ?????"
+
+msgid "Operational Metrics"
+msgstr "?????? ???????"
+
+msgid "Delayed Orders"
+msgstr "??????? ????????"
+
+msgid "Pending Deliveries"
+msgstr "?????? ??????? ???????"
+
+msgid "Unpaid Orders"
+msgstr "??????? ??? ????????"
+
+msgid "48h+"
+msgstr "48 ????+"
+
+msgid "Pending / Assigned / Out"
+msgstr "???? / ????? / ???? ???????"
+
+msgid "Balance > 0"
+msgstr "?????? > 0"
+
+msgid "Last 7 Days"
+msgstr "??? 7 ????"
+
+msgid "Revenue and orders"
+msgstr "????????? ????????"
+
+msgid "Weekly Trend"
+msgstr "??????? ????????"
+
+msgid "Last 8 weeks"
+msgstr "??? 8 ??????"
+
+msgid "Monthly Trend"
+msgstr "??????? ??????"
+
+msgid "Last 6 months"
+msgstr "??? 6 ????"
+
+msgid "Top Services"
+msgstr "???? ???????"
+
+msgid "By revenue"
+msgstr "??? ???????"
+
+msgid "Revenue by Item"
+msgstr "??????? ??? ?????"
+
+msgid "Top items"
+msgstr "???? ???????"
+
+msgid "Customer Insights"
+msgstr "??????? ???????"
+
+msgid "New Customers"
+msgstr "????? ???"
+
+msgid "Returning Customers"
+msgstr "????? ??????"
+
+msgid "Retention Rate"
+msgstr "???? ????????"
+
+msgid "Top Customers"
+msgstr "???? ???????"
+
+msgid "Location-wise Customers"
+msgstr "??????? ??? ??????"
+
+msgid "Top locations"
+msgstr "???? ???????"
+
+msgid "By zone"
+msgstr "??? ???????"
+
+msgid "Location"
+msgstr "??????"
+
+msgid "Delivery Status Report"
+msgstr "????? ???? ???????"
+
+msgid "Delivery orders only"
+msgstr "????? ??????? ???"
+
+msgid "On-time Deliveries"
+msgstr "??????? ?? ?????"
+
+msgid "Late Deliveries"
+msgstr "??????? ??????"
+
+msgid "Delivery Area Performance"
+msgstr "???? ????? ???????"
+
+msgid "Area"
+msgstr "???????"
+
+msgid "Driver Performance"
+msgstr "???? ????????"
+
+msgid "Top drivers"
+msgstr "???? ????????"
+
+msgid "Operations Mix"
+msgstr "???? ????????"
+
+msgid "Cancelled Orders"
+msgstr "??????? ???????"
+
+msgid "Express Orders"
+msgstr "??????? ?????????"
+
+msgid "Normal Orders"
+msgstr "??????? ???????"
+
+msgid "Pickup Orders"
+msgstr "????? ????????"
+
+msgid "Delivery Orders"
+msgstr "????? ???????"
+
+msgid "Orders Handled per Staff"
+msgstr "??????? ??????? ??? ????"
+
+msgid "Cashier activity"
+msgstr "???? ???????"
+
+msgid "Payments by Method"
+msgstr "????????? ??? ???????"
+
+msgid "Amount"
+msgstr "??????"

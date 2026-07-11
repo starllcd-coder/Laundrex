@@ -1,0 +1,82 @@
+Laundrex Usage Guide (English)
+
+Overview
+- Laundrex is a laundry operations system for POS, order tracking, pickup, delivery, payments, reports, and management.
+- Most pages are available from the right-side menu. You must be logged in to access them.
+
+Getting Started
+1) Open the app URL in your browser.
+2) Log in with your account.
+3) Select your preferred language (EN/AR) from the top bar.
+4) Select your branch from the top bar (if available).
+
+Dashboard
+- Shows quick KPIs for today and recent activity.
+- Use it as a starting point to jump to Orders, POS, Payments, or Reports.
+
+POS (Point of Sale)
+1) Go to POS -> New Order.
+2) Add items and services.
+3) Confirm quantities, prices, and discounts.
+4) Save the order or Save & Print.
+5) A receipt can be printed from the order detail page.
+
+Orders List
+- Use filters to search by order number, phone, status, branch, date, or flags.
+- Click an order number to open order details.
+- Use Next/Open actions to move an order forward in the workflow.
+
+Orders Kanban
+- Drag-free columns show orders by status.
+- Use quick actions per order (if enabled) to advance status.
+
+Order Detail
+- Shows customer, totals, items, and history.
+- Use Mark Urgent / Clear Urgent as needed.
+- Use Reprint Receipt to print again.
+- Use Move to: <status> to advance the order.
+
+Pickup Counter
+1) Go to Orders -> Pickup Counter.
+2) Scan QR or enter order number.
+3) Confirm details, then Mark Ready or Mark Delivered.
+4) Reprint receipt if needed.
+
+Delivery
+- Delivery List shows delivery orders and their status.
+- Delivery Detail lets you set driver, address, fee, and time slot.
+- Save Delivery to update the order delivery info.
+
+Payments
+- Payments list shows all recorded payments.
+- From an order detail, you can Collect Payment and add references.
+
+Customers
+- Customers list shows registered customers and VIP status.
+- Customer detail allows editing profile, VIP, language, WhatsApp opt-in, and notes.
+- Order history shows the latest orders for the customer.
+
+Reports
+- Z Report shows daily summary and can be printed.
+- Use filters for date ranges or branches if available.
+
+Management
+- Manage branches, staff, and audit logs (if permissions allow).
+- Use roles to control access (Admin, Manager, Cashier, Worker).
+
+Settings
+- Configure catalog, taxes, and system preferences.
+- Configure WhatsApp templates and messaging options.
+
+Common Workflows
+- New order: POS -> Add items -> Save & Print -> Track in Orders.
+- Pickup: Pickup Counter -> Lookup -> Mark Ready/Delivered.
+- Delivery: Delivery List -> Open -> Assign driver -> Save Delivery.
+
+Troubleshooting
+- If you cannot see a page, verify your permissions.
+- If Arabic labels do not appear, refresh and ensure the AR language is selected.
+- If a receipt does not open, allow popups in your browser.
+
+Support
+- Contact your system administrator for account or permission issues.

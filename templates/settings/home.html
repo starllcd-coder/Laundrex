@@ -1,0 +1,234 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Settings" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Settings" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Settings" %}</h1>
+    <p class="sub">{% trans "Master data, pricing, tax, language and system preferences." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-primary" href="{% url 'catalog:home' %}">{% trans "Open Catalog" %}</a>
+    <a class="btn btn-outline" href="/admin/" target="_blank">{% trans "Admin Panel" %}</a>
+    <form method="get" action="/admin/settings_app/syncsettings/" target="_blank" style="display:inline;">
+      <button class="btn btn-outline" type="submit">{% trans "Sync Settings" %}</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Services" %}</h2>
+      <span class="tag">{% trans "Wash / Iron / Dry" %}</span>
+    </div>
+    <p class="muted">{% trans "Manage available services for POS and pricing rules." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Wash" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+      <div class="row"><b>{% trans "Wash + Iron" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+      <div class="row"><b>{% trans "Iron" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+      <div class="row"><b>{% trans "Dry Clean" %}</b><span class="muted">{% trans "Enabled" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'catalog:home' %}">{% trans "Edit Services" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Items & Pricing" %}</h2>
+      <span class="tag">{% trans "Catalog" %}</span>
+    </div>
+    <p class="muted">{% trans "Item list and price per service. POS can auto-fill price from catalog." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Shirt" %}</b><span class="muted">{% trans "From 0.500 OMR" %}</span></div>
+      <div class="row"><b>{% trans "Pant" %}</b><span class="muted">{% trans "From 0.600 OMR" %}</span></div>
+      <div class="row"><b>{% trans "Kandura" %}</b><span class="muted">{% trans "From 1.000 OMR" %}</span></div>
+      <div class="row"><b>{% trans "Abaya" %}</b><span class="muted">{% trans "From 1.200 OMR" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-primary" href="{% url 'catalog:home' %}">{% trans "Open Items & Prices" %}</a>
+      <a class="btn btn-outline" href="/admin/apps_catalog/itemserviceprice/" target="_blank">{% trans "Edit Prices (Admin)" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Barcode Mapping" %}</h2>
+      <span class="tag">{% trans "Scanner" %}</span>
+    </div>
+    <p class="muted">{% trans "Map barcode -> item for quick entry. POS uses this to auto-select item." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>S001</b><span class="muted">{% trans "Shirt" %}</span></div>
+      <div class="row"><b>K001</b><span class="muted">{% trans "Kandura" %}</span></div>
+      <div class="row"><b>A001</b><span class="muted">{% trans "Abaya" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="{% url 'catalog:home' %}">{% trans "Manage Barcodes" %}</a>
+      <a class="btn btn-outline" href="/admin/apps_catalog/barcodemap/" target="_blank">{% trans "Barcode Admin" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Tax, Discounts & Currency" %}</h2>
+      <span class="tag">{% trans "OMR" %}</span>
+    </div>
+    <p class="muted">{% trans "Set default VAT/tax rules and discount rules." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Default Tax" %}</b><span class="muted">0%</span></div>
+      <div class="row"><b>{% trans "VIP Discount" %}</b><span class="muted">{% trans "Manual / Rule later" %}</span></div>
+      <div class="row"><b>{% trans "Currency" %}</b><span class="muted">{% trans "OMR" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <button class="btn btn-outline" type="button" disabled>{% trans "Configure (Next)" %}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% if LANGUAGE_CODE == "ar" %}التحويل البنكي{% else %}{% trans "Bank Transfer" %}{% endif %}</h2>
+      <span class="tag">{% if LANGUAGE_CODE == "ar" %}دفع تطبيق الجوال{% else %}{% trans "Mobile Checkout" %}{% endif %}</span>
+    </div>
+    <p class="muted">{% if LANGUAGE_CODE == "ar" %}تظهر هذه البيانات في صفحة الدفع بتطبيق الجوال عند اختيار العميل التحويل البنكي.{% else %}{% trans "These details are shown in mobile app checkout when customer selects bank transfer." %}{% endif %}</p>
+
+    <form method="post" class="bank-form">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="bank_transfer">
+
+      <div class="bank-toggle">
+        <label for="id_enabled">{% if LANGUAGE_CODE == "ar" %}مفعل{% else %}{% trans "Enabled" %}{% endif %}</label>
+        <select id="id_enabled" name="enabled">
+            <option value="1" {% if bank_settings.enabled %}selected{% endif %}>{% if LANGUAGE_CODE == "ar" %}نعم{% else %}{% trans "Yes" %}{% endif %}</option>
+            <option value="0" {% if not bank_settings.enabled %}selected{% endif %}>{% if LANGUAGE_CODE == "ar" %}لا{% else %}{% trans "No" %}{% endif %}</option>
+        </select>
+      </div>
+
+      <div class="bank-grid">
+        <div class="bank-field">
+          <label for="id_bank_name">{% if LANGUAGE_CODE == "ar" %}اسم البنك{% else %}{% trans "Bank Name" %}{% endif %}</label>
+          <input id="id_bank_name" name="bank_name" value="{{ bank_settings.bank_name }}" />
+        </div>
+        <div class="bank-field">
+          <label for="id_account_name">{% if LANGUAGE_CODE == "ar" %}اسم الحساب{% else %}{% trans "Account Name" %}{% endif %}</label>
+          <input id="id_account_name" name="account_name" value="{{ bank_settings.account_name }}" />
+        </div>
+        <div class="bank-field">
+          <label for="id_account_number">{% if LANGUAGE_CODE == "ar" %}رقم الحساب{% else %}{% trans "Account Number" %}{% endif %}</label>
+          <input id="id_account_number" name="account_number" value="{{ bank_settings.account_number }}" />
+        </div>
+        <div class="bank-field">
+          <label for="id_iban">{% if LANGUAGE_CODE == "ar" %}آيبان{% else %}{% trans "IBAN" %}{% endif %}</label>
+          <input id="id_iban" name="iban" value="{{ bank_settings.iban }}" />
+        </div>
+        <div class="bank-field bank-field-wide">
+          <label for="id_instructions">{% if LANGUAGE_CODE == "ar" %}التعليمات{% else %}{% trans "Instructions" %}{% endif %}</label>
+          <textarea id="id_instructions" name="instructions" rows="4">{{ bank_settings.instructions }}</textarea>
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="submit">{% if LANGUAGE_CODE == "ar" %}حفظ بيانات البنك{% else %}{% trans "Save Bank Details" %}{% endif %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% if LANGUAGE_CODE == "ar" %}الخلفية الخاصة بتطبيق سطح المكتب{% else %}{% trans "Desktop Backend" %}{% endif %}</h2>
+      <span class="tag">{% if LANGUAGE_CODE == "ar" %}تشغيل محلي{% else %}{% trans "Local Runtime" %}{% endif %}</span>
+    </div>
+    <p class="muted">{% if LANGUAGE_CODE == "ar" %}يوضح ما إذا كان التطبيق يستخدم قاعدة بيانات محلية لسطح المكتب أو خلفية الويب المشتركة.{% else %}{% trans "Shows whether this app is using desktop-local database or shared web backend." %}{% endif %}</p>
+
+    <div class="mini">
+      <div class="row">
+        <b>{% if LANGUAGE_CODE == "ar" %}الوضع{% else %}{% trans "Mode" %}{% endif %}</b>
+        <span class="muted">
+          {% if desktop_backend.mode == "desktop_local" %}
+            {% if LANGUAGE_CODE == "ar" %}محلي (سطح المكتب){% else %}{% trans "Desktop Local" %}{% endif %}
+          {% else %}
+            {% if LANGUAGE_CODE == "ar" %}ويب مشترك{% else %}{% trans "Shared Web" %}{% endif %}
+          {% endif %}
+        </span>
+      </div>
+      <div class="row"><b>{% if LANGUAGE_CODE == "ar" %}وحدة الإعدادات{% else %}{% trans "Settings module" %}{% endif %}</b><span class="muted">{{ desktop_backend.settings_module }}</span></div>
+      <div class="row"><b>{% if LANGUAGE_CODE == "ar" %}مسار قاعدة البيانات{% else %}{% trans "Database path" %}{% endif %}</b><span class="muted">{{ desktop_backend.db_path }}</span></div>
+      <div class="row">
+        <b>{% if LANGUAGE_CODE == "ar" %}مزامنة السحابة{% else %}{% trans "Cloud sync" %}{% endif %}</b>
+        <span class="muted">{% if desktop_backend.sync_enabled %}{% if LANGUAGE_CODE == "ar" %}مفعل{% else %}{% trans "Enabled" %}{% endif %}{% else %}{% if LANGUAGE_CODE == "ar" %}معطل{% else %}{% trans "Disabled" %}{% endif %}{% endif %}</span>
+      </div>
+      <div class="row">
+        <b>{% if LANGUAGE_CODE == "ar" %}نقاط ربط السحابة{% else %}{% trans "Cloud endpoints" %}{% endif %}</b>
+        <span class="muted">{% if desktop_backend.endpoints_enabled %}{% if LANGUAGE_CODE == "ar" %}مفعلة{% else %}{% trans "Enabled" %}{% endif %}{% else %}{% if LANGUAGE_CODE == "ar" %}معطلة{% else %}{% trans "Disabled" %}{% endif %}{% endif %}</span>
+      </div>
+      <div class="row"><b>{% if LANGUAGE_CODE == "ar" %}فاصل المزامنة{% else %}{% trans "Sync interval" %}{% endif %}</b><span class="muted">{{ desktop_backend.interval_seconds }}{% if LANGUAGE_CODE == "ar" %}ث{% else %}s{% endif %}</span></div>
+      <div class="row"><b>{% if LANGUAGE_CODE == "ar" %}رابط السحابة{% else %}{% trans "Cloud URL" %}{% endif %}</b><span class="muted">{{ desktop_backend.cloud_base_url|default:"-" }}</span></div>
+      <div class="row">
+        <b>{% if LANGUAGE_CODE == "ar" %}آخر مزامنة{% else %}{% trans "Last sync" %}{% endif %}</b>
+        <span class="muted">
+          {% if desktop_backend.last_synced_at %}
+            {{ desktop_backend.last_synced_at|date:"Y-m-d H:i" }}
+          {% else %}
+            -
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="mini-actions">
+      <form method="get" action="/admin/settings_app/syncsettings/" target="_blank" style="display:inline;">
+        <button class="btn btn-outline" type="submit">{% if LANGUAGE_CODE == "ar" %}فتح إعدادات المزامنة{% else %}{% trans "Open Sync Settings" %}{% endif %}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "System" %}</h2>
+      <span class="tag">{% trans "Security" %}</span>
+    </div>
+    <p class="muted">{% trans "Backups, users, permissions, receipt header/footer, printer settings." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Receipt Template" %}</b><span class="muted">{% trans "80mm" %}</span></div>
+      <div class="row"><b>{% trans "Users" %}</b><span class="muted">{% trans "Admin Panel" %}</span></div>
+    </div>
+
+    <div class="mini-actions">
+      <a class="btn btn-outline" href="/admin/" target="_blank">{% trans "Open Admin" %}</a>
+      <a class="btn btn-outline" href="{% url 'management:home' %}">{% trans "Open Management" %}</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "About" %}</h2>
+      <span class="tag">{% trans "Support" %}</span>
+    </div>
+    <p class="muted">{% trans "Product support and company contact details." %}</p>
+
+    <div class="mini">
+      <div class="row"><b>{% trans "Developed by" %}</b><span class="muted">Deedarian Software Solutions</span></div>
+      <div class="row"><b>{% trans "Call" %}</b><span class="muted">+968 72846363</span></div>
+      <div class="row"><b>{% trans "WhatsApp" %}</b><span class="muted">+968 99850826</span></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

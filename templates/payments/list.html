@@ -1,0 +1,112 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Payments" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Payments" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/payments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Payments" %}</h1>
+    <p class="sub">{% trans "View paid / outstanding amounts by order." %}</p>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label>{% trans "Search" %}</label>
+    <input name="q" value="{{ q }}" placeholder="{% trans "Order #, phone, customer" %}" />
+  </div>
+
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat..." %}" />
+  </div>
+
+  <div class="field">
+    <label>{% trans "Status" %}</label>
+    <select name="status">
+      <option value="">{% trans "All" %}</option>
+      {% for code,label in status_choices %}
+        <option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Order" %}</th>
+          <th>{% trans "Customer" %}</th>
+          <th>{% trans "Branch" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="right">{% trans "Total" %}</th>
+          <th class="right">{% trans "Paid" %}</th>
+          <th class="right">{% trans "Amount Due" %}</th>
+          <th>{% trans "Proofs" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td>
+            <a class="link" href="{% url 'payments:detail' o.order_no %}">#{{ o.order_no }}</a>
+            <div class="muted">{{ o.created_at }}</div>
+          </td>
+
+          <td>
+            <b>{{ o.customer.name|default:walk_in_label }}</b>
+            <div class="muted">{{ o.customer.phone|default:"" }}</div>
+          </td>
+
+          <td>{{ o.branch }}</td>
+
+          <td>
+            <span class="pill">{{ o.get_status_display }}</span>
+          </td>
+
+          <td class="right"><b>{{ o.total }}</b></td>
+          <td class="right">{{ o.paid }}</td>
+          <td class="right">
+            <b class="{% if o.balance > 0 %}neg{% endif %}">{{ o.balance }}</b>
+          </td>
+          <td>
+            {% for p in o.payments.all %}
+              {% if p.proof %}
+                <a class="link" target="_blank" href="{{ p.proof.url }}">{% trans "Proof" %}</a>
+              {% endif %}
+            {% empty %}
+              -
+            {% endfor %}
+          </td>
+
+          <td class="right">
+            <a class="btn-sm" href="{% url 'payments:detail' o.order_no %}">{% trans "Open" %}</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="muted">{% trans "No orders found." %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

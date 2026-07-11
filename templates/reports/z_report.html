@@ -1,0 +1,151 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Z Report" %} | {{ active_business_name|default:"Laundrex" }}{% endblock %}
+{% block topbar_title %}{% trans "Z Report" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Z Report" %}</h1>
+    <p class="sub">{% trans "Daily closing summary by payment method." %}</p>
+  </div>
+  <div class="actions no-print">
+    <a class="btn btn-outline" href="{% url 'reports:home' %}">{% trans "Back" %}</a>
+    <a class="btn btn-outline" href="{% url 'reports:export_z_pdf' %}?{{ request.GET.urlencode }}">{% trans "Export PDF" %}</a>
+    <button class="btn btn-outline" type="button" onclick="window.print()">{% trans "Print" %}</button>
+  </div>
+</div>
+
+<div class="print-only print-head">
+  <div class="print-brand-row">
+    {% if active_business_logo_url %}
+    <img class="print-logo" src="{{ active_business_logo_url }}" alt="{{ active_business_name|default:'Laundrex' }}">
+    {% endif %}
+    <div class="print-brand">{{ active_business_name|default:"Laundrex" }}</div>
+  </div>
+  <div class="print-title">{% trans "Z Report" %}</div>
+  <div class="print-meta">
+    <span>{% trans "Branch" %}: {{ branch|default:"All" }}</span>
+    <span>{% trans "Date" %}: {{ date }}</span>
+    <span>{% trans "Generated at" %}: {{ generated_at|date:"Y-m-d H:i" }}</span>
+  </div>
+</div>
+
+<form class="filters no-print" method="get">
+  <div class="field">
+    <label>{% trans "Date" %}</label>
+    <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" />
+  </div>
+
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat..." %}" />
+  </div>
+
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="cards">
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Orders" %}</div>
+    <div class="kpi-value">{{ order_totals.orders|default:"0" }}</div>
+    <div class="kpi-sub">{% trans "Count" %}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Revenue" %}</div>
+    <div class="kpi-value">{{ order_totals.revenue|default:0|floatformat:3 }}</div>
+    <div class="kpi-sub">{% trans "Total sales" %}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Paid" %}</div>
+    <div class="kpi-value">{{ order_totals.paid|default:0|floatformat:3 }}</div>
+    <div class="kpi-sub">{% trans "Collected" %}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-title">{% trans "Outstanding" %}</div>
+    <div class="kpi-value">{{ order_totals.balance|default:0|floatformat:3 }}</div>
+    <div class="kpi-sub">{% trans "Amount due" %}</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Payments by Method" %}</h2>
+    <span class="muted">{% trans "Total" %}: {{ payment_total.total|default:0|floatformat:3 }}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Method" %}</th>
+          <th class="right">{% trans "Count" %}</th>
+          <th class="right">{% trans "Total" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in by_method %}
+        <tr>
+          <td><b>{{ row.label }}</b></td>
+          <td class="right">{{ row.count }}</td>
+          <td class="right"><b>{{ row.total|default:0|floatformat:3 }}</b></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="muted">{% trans "No payments found." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card no-print" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Recent Payments" %}</h2>
+    <span class="muted">{% trans "Top 200" %}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Order" %}</th>
+          <th>{% trans "Method" %}</th>
+          <th>{% trans "Reference" %}</th>
+          <th class="right">{% trans "Amount" %}</th>
+          <th class="right">{% trans "Time" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td><b>#{{ p.order.order_no }}</b></td>
+          <td>{{ p.get_method_display }}</td>
+          <td>{{ p.reference|default:"-" }}</td>
+          <td class="right"><b>{{ p.amount|default:0|floatformat:3 }}</b></td>
+          <td class="right">{{ p.created_at|date:"H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="muted">{% trans "No payments found." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="print-only print-foot">
+  <span>{{ active_business_name|default:"Laundrex" }} - {% trans "Z Report" %}</span>
+  <span>{% trans "Generated at" %}: {{ generated_at|date:"Y-m-d H:i" }}</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script></script>
+{% endblock %}

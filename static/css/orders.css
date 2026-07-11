@@ -1,0 +1,470 @@
+:root{
+  --primary-900:#0B2A52;
+  --primary-700:#134B8A;
+  --primary-500:#1E6CCB;
+  --accent-500:#19B6B6;
+  --text-900:#0B1220;
+  --text-700:#334155;
+  --text-500:#64748B;
+  --line:#E7EEF7;
+  --shadow-soft: 0 12px 26px rgba(2,24,74,.08);
+  --radius-lg: 16px;
+}
+
+.orders-head{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:16px; margin-bottom:16px;
+}
+.h1{ margin:0; font-size:34px; letter-spacing:-.5px; color:#1B2A44; }
+.sub{ margin:6px 0 0; color:var(--text-500); font-weight:600; }
+.actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+.filters{
+  display:flex; gap:12px; flex-wrap:wrap;
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg);
+  padding:14px; box-shadow: var(--shadow-soft); margin-bottom:14px;
+}
+.field{ display:flex; flex-direction:column; gap:6px; min-width:200px; }
+.field.grow{ flex:1 1 220px; }
+.field label{ color:var(--text-500); font-weight:900; font-size:12px; }
+.field input,.field select{
+  border:1px solid var(--line); border-radius:12px; padding:12px;
+  outline:none; font-weight:700; color:var(--text-900); background:#fff;
+}
+.field input:focus,.field select:focus{
+  border-color: rgba(25,182,182,.7);
+  box-shadow: 0 0 0 4px rgba(25,182,182,.12);
+}
+
+.card{
+  background:#fff; border:1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding:16px;
+}
+.card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.card-title{ margin:0; font-size:16px; font-weight:900; color:#1B2A44; }
+.muted{ color:var(--text-500); font-weight:700; font-size:13px; }
+
+.table-wrap{ overflow:auto; }
+.table{ width:100%; border-collapse:separate; border-spacing:0 10px; }
+.table thead th{
+  text-align:left; color:var(--text-500);
+  font-size:12px; font-weight:900; padding:0 10px;
+}
+.table tbody td{
+  padding:12px 10px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1));
+}
+.table tbody td:first-child{
+  border-left:1px solid var(--line);
+  border-top-left-radius:14px;
+  border-bottom-left-radius:14px;
+}
+.table tbody td:last-child{
+  border-right:1px solid var(--line);
+  border-top-right-radius:14px;
+  border-bottom-right-radius:14px;
+}
+.right{ text-align:right; }
+
+.link{ color:var(--primary-700); font-weight:900; text-decoration:none; }
+.link:hover{ text-decoration:underline; }
+
+.neg{ color:#b91c1c; }
+
+.check-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; min-height:44px; }
+.check-inline{ display:inline-flex; gap:8px; align-items:center; font-weight:800; color:var(--text-700); }
+.check-inline input{ width:18px; height:18px; accent-color:var(--accent-500); }
+
+.pill{
+  display:inline-flex; padding:6px 10px; border-radius:999px;
+  border:1px solid var(--line); font-weight:900; font-size:12px;
+  background:#fff; color:var(--text-700);
+}
+.pill.received{ border-color:rgba(30,108,203,.25); background:rgba(30,108,203,.08); color:var(--primary-700); }
+.pill.washing{ border-color:rgba(25,182,182,.25); background:rgba(25,182,182,.08); color:var(--accent-500); }
+.pill.ironing{ border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.10); color:#b45309; }
+.pill.ready{ border-color:rgba(34,197,94,.25); background:rgba(34,197,94,.10); color:#15803d; }
+.pill.delivered{ border-color:rgba(100,116,139,.25); background:rgba(100,116,139,.10); color:#334155; }
+.pill.cancelled{ border-color:rgba(239,68,68,.25); background:rgba(239,68,68,.10); color:#b91c1c; }
+
+.badge-urgent{
+  display:inline-flex; margin-left:6px; padding:4px 8px; border-radius:999px;
+  background:#FEF3C7; color:#92400E; font-weight:900; font-size:11px;
+  border:1px solid rgba(245,158,11,.35);
+}
+
+.badge-delay{
+  display:inline-flex; margin-left:6px; padding:4px 8px; border-radius:999px;
+  background:#FEE2E2; color:#991B1B; font-weight:900; font-size:11px;
+  border:1px solid rgba(239,68,68,.35);
+}
+
+.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+.kv{ display:flex; flex-direction:column; gap:8px; font-size:13px; }
+.kv > div{ display:flex; justify-content:space-between; gap:10px; }
+.kv span{ color:var(--text-500); font-weight:800; }
+.kv b{ font-weight:900; color:#1B2A44; }
+.kv .grand{ padding-top:6px; font-size:15px; }
+
+.actions-row{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; }
+.wa-send-form{ align-items:center; }
+.wa-select{
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  min-height:46px;
+  min-width:220px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:0 42px 0 14px;
+  background:
+    linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat,no-repeat;
+  background-position:0 0, right 12px center;
+  background-size:auto,16px;
+  color:var(--text-900);
+  font-weight:800;
+  outline:none;
+  transition:border-color .16s ease, box-shadow .16s ease;
+}
+.wa-select:focus{
+  border-color: rgba(25,182,182,.75);
+  box-shadow: 0 0 0 4px rgba(25,182,182,.12);
+}
+.wa-lang-select{ min-width:140px; }
+
+.row-actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; flex-wrap:wrap; }
+
+.banner{ padding:10px 12px; border-radius:12px; font-weight:800; margin:10px 0; }
+.banner.error{ background:#FFF1F2; border:1px solid #FFE4E6; color:#9F1239; }
+.banner.info{ background:#ECFEFF; border:1px solid #CFFAFE; color:#0E7490; }
+
+.pickup-grid{ display:grid; grid-template-columns: 1.2fr 0.8fr; gap:14px; }
+.pickup-actions form{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+
+[dir="rtl"] .pickup-grid{
+  /* swap columns so detail card appears on the right */
+  grid-template-columns: 0.8fr 1.2fr;
+}
+
+[dir="rtl"] .pickup-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:flex-start; /* anchor actions to left in RTL */
+}
+
+[dir="rtl"] .pickup-actions form{ flex-direction: row; }
+
+[dir="rtl"] .pickup-actions form:first-child{ order: 1; }
+[dir="rtl"] .pickup-actions form:last-child{ order: 2; }
+
+.pay-form .form-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:12px; }
+.pay-form .field{ min-width:200px; }
+.pay-form .mini-actions{ margin-top:6px; }
+
+.kanban{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+.kanban-col{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow: var(--shadow-soft); display:flex; flex-direction:column; min-height:320px; }
+.kanban-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1)); border-top-left-radius:var(--radius-lg); border-top-right-radius:var(--radius-lg); }
+.kanban-title{ font-weight:900; color:#1B2A44; }
+.kanban-list{ padding:12px; display:flex; flex-direction:column; gap:10px; }
+.kanban-card{ border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; box-shadow: var(--shadow-soft); }
+.kanban-card .card-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
+.kanban-card .card-body{ margin-bottom:10px; }
+.kanban-card .card-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.kanban-card .card-actions input,
+.kanban-card .card-actions select{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:8px 10px;
+  font-weight:800;
+  color:var(--text-900);
+  background:#fff;
+  min-width:120px;
+}
+
+.calendar-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:14px;
+}
+.calendar-col{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow: var(--shadow-soft); display:flex; flex-direction:column; min-height:220px;
+}
+.calendar-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1));
+  border-top-left-radius:var(--radius-lg); border-top-right-radius:var(--radius-lg);
+}
+.calendar-title{ font-weight:900; color:#1B2A44; }
+.calendar-list{ padding:12px; display:flex; flex-direction:column; gap:10px; }
+.calendar-card{
+  border:1px solid var(--line); border-radius:14px; padding:12px;
+  background:#fff; box-shadow: var(--shadow-soft);
+}
+.calendar-col.drop-target,
+.slot-section.drop-target{
+  outline:2px dashed rgba(30,108,203,.35);
+  outline-offset: -6px;
+}
+
+.week-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:14px;
+}
+.week-day{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow: var(--shadow-soft); display:flex; flex-direction:column; min-height:220px;
+}
+.week-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1));
+  border-top-left-radius:var(--radius-lg); border-top-right-radius:var(--radius-lg);
+}
+.week-title{ font-weight:900; color:#1B2A44; }
+.slot-section{ padding:12px; border-bottom:1px dashed var(--line); }
+.slot-title{ font-weight:900; color:#1B2A44; margin-bottom:8px; }
+.slot-list{ display:flex; flex-direction:column; gap:8px; }
+.empty{ color:var(--text-500); font-weight:700; font-size:13px; padding:8px; }
+
+.timeline{ display:flex; flex-direction:column; gap:10px; }
+.timeline-row{
+  display:flex; gap:12px; align-items:flex-start;
+  padding:10px 12px; border:1px solid var(--line); border-radius:12px;
+  background:linear-gradient(180deg, rgba(246,250,255,.9), rgba(255,255,255,1));
+}
+.timeline-time{ min-width:160px; font-weight:800; color:#1B2A44; }
+.timeline-body{ display:flex; flex-direction:column; gap:4px; }
+.timeline-title{ font-weight:900; color:#1B2A44; }
+
+@media (max-width: 1100px){
+  .grid{ grid-template-columns: 1fr; }
+  .field{ min-width: 160px; }
+  .pickup-grid{ grid-template-columns: 1fr; }
+  .kanban{ grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+}
+
+@media (max-width: 760px){
+  .kanban{ grid-template-columns: 1fr; }
+}
+
+[dir="rtl"] .orders-head,
+[dir="rtl"] .actions,
+[dir="rtl"] .filters,
+[dir="rtl"] .card-head,
+[dir="rtl"] .check-row,
+[dir="rtl"] .row-actions,
+[dir="rtl"] .kanban-head,
+[dir="rtl"] .kanban-card .card-top,
+[dir="rtl"] .pay-form .form-row{
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .wa-select{
+  padding:0 14px 0 42px;
+  background-position:0 0, left 12px center;
+  text-align:right;
+}
+
+[dir="rtl"] .table thead th{
+  text-align:right;
+}
+
+/* Ensure orders filters and headings fully mirror for RTL */
+
+[dir="rtl"] .orders-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end; /* anchor title to the right */
+}
+
+[dir="rtl"] .orders-head > div{ text-align: right; }
+
+[dir="rtl"] .orders-head .actions{ order: 1; }
+[dir="rtl"] .orders-head > div:first-child{ order: 2; }
+
+
+
+[dir="rtl"] .filters{
+  /* mirror the English layout without changing row/column breaks */
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end; /* keep alignment like before */
+  flex-direction: row-reverse; /* flip content order for Arabic */
+  direction: rtl;
+}
+
+
+[dir="rtl"] .filters .field{ text-align: right; }
+
+/* Custom RTL ordering: swap Date and Search, swap Flags and Apply */
+[dir="rtl"] .filters .field:nth-child(1){ order: 4; } /* Search -> Date spot */
+[dir="rtl"] .filters .field:nth-child(2){ order: 3; } /* Status */
+[dir="rtl"] .filters .field:nth-child(3){ order: 2; } /* Branch */
+[dir="rtl"] .filters .field:nth-child(4){ order: 1; } /* Date -> Search spot */
+[dir="rtl"] .filters .field:nth-child(5){ order: 6; } /* Flags -> Apply spot */
+[dir="rtl"] .filters .field:nth-child(6){ order: 5; } /* Apply -> Flags spot */
+
+[dir="rtl"] .filters .field input,
+[dir="rtl"] .filters .field select{
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="rtl"] .filters .field input::placeholder{
+  text-align: right;
+}
+
+/* Mirror heading and actions like dashboard: title on right, actions on left */
+[dir="rtl"] .orders-head{
+  display:flex; align-items:flex-end; justify-content:flex-start; flex-direction: row;
+}
+
+[dir="rtl"] .orders-head > div:first-child{ /* title container */
+  order: 1;
+}
+
+[dir="rtl"] .orders-head .actions{
+  order: 2;
+  /* keep buttons left-to-right inside actions */
+  flex-direction: row;
+  margin-inline-start: auto;
+}
+
+[dir="rtl"] .h1{
+  text-align: right;
+  direction: rtl;
+}
+
+/* keep English subtitles readable but aligned to the right in RTL pages
+   (prevents punctuation/dot from appearing at the start of the line) */
+[dir="rtl"] .sub{
+  text-align: right;
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+[dir="rtl"] .filters{
+  text-align: right;
+}
+
+[dir="rtl"] .row-actions{ justify-content:flex-start; }
+
+[dir="rtl"] .table tbody td:first-child{
+  border-left:1px solid var(--line);
+  border-right:0;
+  border-top-left-radius:14px;
+  border-bottom-left-radius:14px;
+}
+
+[dir="rtl"] .table tbody td:last-child{
+  border-right:1px solid var(--line);
+  border-left:0;
+  border-top-right-radius:14px;
+  border-bottom-right-radius:14px;
+}
+
+/* Customer-specific tweaks for RTL */
+[dir="rtl"] .mini-actions{
+  display:flex;
+  justify-content:flex-start;
+}
+
+[dir="rtl"] .kv{ text-align: right; }
+
+[dir="rtl"] .card .card-head{ flex-direction: row-reverse; }
+
+/* Final override: force customers/orders header title to the right and actions to the left in RTL */
+[dir="rtl"] .orders-head{
+  display:flex;
+  align-items:flex-end;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+[dir="rtl"] .orders-head .actions{ order: 1; }
+[dir="rtl"] .orders-head > div:first-child{ order: 2; text-align: right; }
+
+/* Strong RTL override for Orders page: place title on the right and actions on the left */
+[dir="rtl"] .orders-head{
+  flex-direction: row-reverse !important;
+  justify-content: space-between !important;
+}
+
+[dir="rtl"] .orders-head .actions{
+  order: 1 !important;
+  flex-direction: row; /* keep buttons left-to-right visually */
+}
+
+[dir="rtl"] .orders-head > div:first-child{
+  order: 2 !important;
+  text-align: right !important;
+}
+
+/* If there are no actions (e.g. customers list) the header block can stay
+   centered; force the title container to take full width and align right so
+   the h1 and subtitle render on the right side in RTL pages. */
+[dir="rtl"] .orders-head > div{
+  width: 100% !important;
+  text-align: right !important;
+  margin: 0 !important;
+  align-self: flex-end !important;
+}
+
+/* Customers page: match Orders heading/subtitle alignment in RTL */
+[dir="rtl"] .customers-head{
+  /* Use same alignment as .orders-head on RTL pages: title on the right */
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+  text-align: right !important;
+}
+
+[dir="rtl"] .customers-head .h1{
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+[dir="rtl"] .customers-head .sub{
+  text-align: right !important;
+  /* keep subtitle readable by using LTR rendering for punctuation */
+  direction: ltr !important;
+  unicode-bidi: embed !important;
+}
+
+/* Ensure the inner title container occupies the content width and aligns right */
+[dir="rtl"] .customers-head > div{
+  width: 100% !important;
+  text-align: right !important;
+  margin: 0 !important;
+  align-self: flex-end !important;
+}
+
+/* RTL: force actions to sit flush with the content's left edge (container padding is 18px) */
+[dir="rtl"] .orders-head.orders-head--with-actions > div{ width: auto !important; }
+
+[dir="rtl"] .orders-head.orders-head--with-actions{
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+}
+
+[dir="rtl"] .orders-head.orders-head--with-actions .actions{
+  /* move actions outside the content padding and pin to left edge */
+  /* reduce negative offset so actions have breathing room from the edge */
+  margin-inline-start: -10px !important;
+  margin-left: -10px !important;
+  /* nudge down slightly so buttons align with header baseline */
+  margin-top: 8px !important;
+  /* add inner padding so buttons don't touch the edge */
+  padding-inline-start: 10px !important;
+  padding-left: 10px !important;
+  align-self: flex-start !important;
+}

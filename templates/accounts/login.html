@@ -1,0 +1,180 @@
+{% extends "base_public.html" %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}{% trans "Login" %} | Laundrex{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shell">
+  <div class="window" id="loginWindow">
+
+    <!-- LEFT: Logo + Tagline -->
+    <section class="left">
+      <div class="brand">
+        <!-- Use your official logo (no tagline) -->
+        <img class="brand-logo" src="{% static 'assets/laundrex-logo-no-tagline.png' %}" alt="Laundrex logo" />
+        <p class="tagline" id="brandTagline">{% trans "Smart Laundry. Simplified." %}</p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- RIGHT: Language + Welcome + Login Card -->
+    <section class="right">
+      <div class="lang" role="group" aria-label="Language selector">
+        <button type="button" class="active" id="btn-en">EN</button>
+        <button type="button" id="btn-ar">عربي</button>
+      </div>
+
+      <div class="welcome">
+        <h1 id="welcomeTitle">Welcome Back</h1>
+        <p id="welcomeSub">Please login to your account</p>
+      </div>
+
+      <form class="card" method="post" action="{% url 'accounts:login' %}" id="loginForm">
+        {% csrf_token %}
+        <input type="hidden" name="lang" id="langInput" value="{{ LANGUAGE_CODE|default:'en' }}" />
+        {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 21a8 8 0 10-16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 13a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <input id="username" name="username" type="text" autocomplete="username"
+                 placeholder="Username or Email" required />
+        </div>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 11V8a5 5 0 0110 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6 11h12v10H6V11z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <input id="password" name="password" type="password" autocomplete="current-password"
+                 placeholder="Password" required />
+          <div class="pwd-actions">
+            <button class="ghost-btn" type="button" id="togglePwd" aria-label="Show password">
+              <svg class="icon" style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 21V3h12v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M16 9h4v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 7h4M8 11h4M8 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <select id="branch" name="branch" required {% if branch_locked %}disabled{% endif %}>
+            <option value="" selected disabled>Branch</option>
+            {% for value,label in branches %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+          {% if branch_locked and branches|length == 1 %}
+            <input type="hidden" name="branch" value="{{ branches.0.0 }}" />
+          {% endif %}
+        </div>
+
+        <div class="row">
+          <label class="check">
+            <input type="checkbox" name="remember" id="remember" />
+            <span id="rememberText">Remember me</span>
+          </label>
+          <a class="link" href="#" id="forgotText">Forgot password?</a>
+        </div>
+
+        <button class="primary-btn" type="submit" id="loginBtn">Login</button>
+        <div class="meta">v1.0</div>
+      </form>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  // Password show/hide
+  const togglePwd = document.getElementById("togglePwd");
+  const pwd = document.getElementById("password");
+  togglePwd.addEventListener("click", () => {
+    const isPw = pwd.type === "password";
+    pwd.type = isPw ? "text" : "password";
+    togglePwd.setAttribute("aria-label", isPw ? "Hide password" : "Show password");
+  });
+
+  // Language toggle
+  const btnEn = document.getElementById("btn-en");
+  const btnAr = document.getElementById("btn-ar");
+
+  const ui = {
+    en: {dir:"ltr",welcomeTitle:"Welcome Back",welcomeSub:"Please login to your account",usernamePH:"Username or Email",passwordPH:"Password",branchPH:"Branch",remember:"Remember me",forgot:"Forgot password?",login:"Login",tagline:"Smart Laundry. Simplified."},
+    ar: {dir:"rtl",welcomeTitle:"مرحبًا بعودتك",welcomeSub:"يرجى تسجيل الدخول إلى حسابك",usernamePH:"اسم المستخدم أو البريد الإلكتروني",passwordPH:"كلمة المرور",branchPH:"الفرع",remember:"تذكرني",forgot:"هل نسيت كلمة المرور؟",login:"تسجيل الدخول",tagline:"غسيل ذكي. ببساطة."}
+  };
+
+  function setLang(lang){
+    const t = ui[lang];
+    document.documentElement.lang = lang;
+    document.documentElement.dir = t.dir;
+    const win = document.getElementById("loginWindow");
+    win.classList.toggle("is-en", lang === "en");
+    win.classList.toggle("is-ar", lang === "ar");
+    document.getElementById("welcomeTitle").textContent = t.welcomeTitle;
+    document.getElementById("welcomeSub").textContent = t.welcomeSub;
+    document.getElementById("brandTagline").textContent = t.tagline;
+    document.getElementById("username").placeholder = t.usernamePH;
+    document.getElementById("password").placeholder = t.passwordPH;
+    document.getElementById("branch").options[0].text = t.branchPH;
+    document.getElementById("rememberText").textContent = t.remember;
+    document.getElementById("forgotText").textContent = t.forgot;
+    document.getElementById("loginBtn").textContent = t.login;
+    btnEn.classList.toggle("active", lang === "en");
+    btnAr.classList.toggle("active", lang === "ar");
+    document.getElementById("langInput").value = lang;
+  }
+
+  btnEn.addEventListener("click", () => setLang("en"));
+  btnAr.addEventListener("click", () => setLang("ar"));
+  setLang("{{ LANGUAGE_CODE|default:'en' }}");
+
+  // Remember last username + branch (no password)
+  const rememberBox = document.getElementById("remember");
+  const loginForm = document.getElementById("loginForm");
+  const branchSelect = document.getElementById("branch");
+  const rememberKey = "laundrexRemember";
+
+  try {
+    const raw = localStorage.getItem(rememberKey);
+    if(raw) {
+      const data = JSON.parse(raw);
+      if(data && data.username) {
+        document.getElementById("username").value = data.username;
+        rememberBox.checked = true;
+      }
+      if(data && data.branch) {
+        branchSelect.value = data.branch;
+      }
+    }
+  } catch (e) {
+    localStorage.removeItem(rememberKey);
+  }
+
+  loginForm.addEventListener("submit", () => {
+    if(rememberBox.checked) {
+      const payload = {
+        username: (document.getElementById("username").value || "").trim(),
+        branch: branchSelect.value || "",
+      };
+      try {
+        localStorage.setItem(rememberKey, JSON.stringify(payload));
+      } catch (e) {
+        localStorage.removeItem(rememberKey);
+      }
+    } else {
+      localStorage.removeItem(rememberKey);
+    }
+  });
+</script>
+{% endblock %}

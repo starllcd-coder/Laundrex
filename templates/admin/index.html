@@ -1,0 +1,13 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+{{ block.super }}
+
+<div class="module" style="margin-top: 16px;">
+  <h2>Maintenance</h2>
+  <div class="description">
+    <p>Reset transactional data (orders, payments, customers, logs). Users, branches, and settings remain.</p>
+    <a class="button" href="{% url 'admin:reset_app_data' %}">Reset App Data</a>
+  </div>
+</div>
+{% endblock %}

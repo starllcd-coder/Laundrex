@@ -1,0 +1,156 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Payment" context "payment_section" %} | {% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}{% endblock %}
+{% block topbar_title %}{% trans "Payment" context "payment_section" %} - #{{ order.order_no }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/payments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}</h1>
+    <p class="sub">
+      {% trans "Branch" %}: <b>{{ order.branch }}</b> •
+      {% trans "Customer" %}: <b>{{ order.customer.name|default:walk_in_label }}</b>
+    </p>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'payments:list' %}">{% trans "Back" %}</a>
+    <a class="btn btn-primary" target="_blank" href="{% url 'pos:receipt_80mm' %}?order={{ order.order_no }}">{% trans "Reprint" %}</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2 class="card-title">{% trans "Payment Summary" %}</h2>
+
+    <div class="kv">
+      <div><span>{% trans "Total" %}</span><b>{{ order.total }} OMR</b></div>
+      <div><span>{% trans "Paid" %}</span><b>{{ order.paid }} OMR</b></div>
+      <div><span>{% trans "Amount Due" %}</span><b class="{% if order.balance > 0 %}neg{% endif %}">{{ order.balance }} OMR</b></div>
+      <div><span>{% trans "Status" %}</span><b>{{ order.get_status_display }}</b></div>
+      <div><span>{% trans "Cashier" %}</span><b>{{ order.cashier.username|default:"-" }}</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">{% trans "Add Payment" %}</h2>
+
+    {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+
+    <form method="post" class="pay-form" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Amount (OMR)" %}</label>
+          <input name="amount" type="number" step="0.001" min="0" placeholder="{% trans "0.000" %}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Method" %}</label>
+          <select name="method">
+            {% for code,label in method_choices %}
+              <option value="{{ code }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Reference" %}</label>
+          <input name="reference" type="text" placeholder="{% trans "Txn ID / bank ref" %}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Note" %}</label>
+          <input name="note" type="text" placeholder="{% trans "Optional" %}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Bank Transfer Proof" %}</label>
+          <input name="proof" type="file" />
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="submit">{% trans "Add Payment" %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">{% trans "Payment History" %}</h2>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Method" %}</th>
+            <th>{% trans "Reference" %}</th>
+            <th>{% trans "Note" %}</th>
+            <th>{% trans "Proof" %}</th>
+            <th class="right">{% trans "Amount" %}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td>{{ p.created_at }}</td>
+            <td><b>{{ p.get_method_display }}</b></td>
+            <td>{{ p.reference|default:"-" }}</td>
+            <td>{{ p.note|default:"-" }}</td>
+            <td>{% if p.proof %}<a class="link" target="_blank" href="{{ p.proof.url }}">{% trans "View" %}</a>{% else %}-{% endif %}</td>
+            <td class="right"><b>{{ p.amount }}</b></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="muted">{% trans "No payments yet." %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">{% trans "Items" %}</h2>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Item" %}</th>
+            <th>{% trans "Service" %}</th>
+            <th class="right">{% trans "Qty" %}</th>
+            <th class="right">{% trans "Line Total" %}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for it in order.items.all %}
+          <tr>
+            <td><b>{{ it.item_name }}</b></td>
+            <td>{{ it.service_name }}</td>
+            <td class="right">{{ it.qty }}</td>
+            <td class="right"><b>{{ it.line_total }}</b></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="muted">{% trans "No items." %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

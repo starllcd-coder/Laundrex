@@ -1,0 +1,158 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Branch" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Branch" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Branch" %}: {{ branch.name }}</h1>
+    <p class="sub">{% trans "Edit branch details and rules." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'management:branches' %}">{% trans "Back" %}</a>
+  </div>
+</div>
+
+<div class="card">
+  <form method="post" enctype="multipart/form-data" class="pay-form">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Code" %}</label>
+        <input name="code" value="{{ branch.code }}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Name" %}</label>
+        <input name="name" value="{{ branch.name }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Status" %}</label>
+        <select name="active">
+          <option value="1" {% if branch.active %}selected{% endif %}>{% trans "Active" %}</option>
+          <option value="0" {% if not branch.active %}selected{% endif %}>{% trans "Inactive" %}</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label>{% trans "Tax Rate (%)" %}</label>
+        <input name="tax_rate" type="number" step="0.01" min="0" value="{{ branch.tax_rate }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Allow Discounts" %}</label>
+        <select name="allow_discounts">
+          <option value="1" {% if branch.allow_discounts %}selected{% endif %}>{% trans "Yes" %}</option>
+          <option value="0" {% if not branch.allow_discounts %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label>{% trans "Max Discount %" %}</label>
+        <input name="max_discount_percent" type="number" step="0.01" min="0" value="{{ branch.max_discount_percent }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Address" %}</label>
+        <input name="address" value="{{ branch.address }}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Address (Arabic)" %}</label>
+        <input name="address_ar" value="{{ branch.address_ar }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Phone" %}</label>
+        <input name="phone" value="{{ branch.phone }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Receipt Header" %}</label>
+        <input name="receipt_header" value="{{ branch.receipt_header }}" placeholder="{% trans "Laundrex - Muscat" %}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Receipt Footer" %}</label>
+        <input name="receipt_footer" value="{{ branch.receipt_footer }}" placeholder="{% trans "Thank you" %}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Receipt Footer (Arabic)" %}</label>
+        <input name="receipt_footer_ar" value="{{ branch.receipt_footer_ar }}" placeholder="شكرا لتعاملكم" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "CR Number" %}</label>
+        <input name="cr_number" value="{{ branch.cr_number }}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "VAT Number" %}</label>
+        <input name="vat_number" value="{{ branch.vat_number }}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Printer Name" %}</label>
+        <input name="printer_name" value="{{ branch.printer_name }}" placeholder="{% trans "POS-Printer-01" %}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Receipt Logo" %}</label>
+        <input name="receipt_logo" type="file" accept="image/*" />
+        {% if branch.receipt_logo %}
+          <div class="muted">{{ branch.receipt_logo.name }}</div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+            <input type="checkbox" name="clear_receipt_logo" value="1" />
+            <span>{% trans "Remove current logo" %}</span>
+          </label>
+        {% else %}
+          <div class="muted">{% trans "Uses default logo if not uploaded." %}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Receipt Template" %}</label>
+        <select name="receipt_template">
+          <option value="80mm" {% if branch.receipt_template == "80mm" %}selected{% endif %}>{% trans "80mm" %}</option>
+          <option value="a4" {% if branch.receipt_template == "a4" %}selected{% endif %}>{% trans "A4" %}</option>
+        </select>
+      </div>
+      <div class="field grow">
+        <label>{% trans "Receipt Copies" %}</label>
+        <input name="receipt_copies" type="number" min="1" value="{{ branch.receipt_copies }}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Delivery Slot Templates" %}</label>
+        <textarea name="delivery_slot_templates" rows="3" placeholder="{% trans "Morning, Afternoon, Evening" %}">{{ branch.delivery_slot_templates }}</textarea>
+        <div class="muted">{% trans "Separate by comma or new line." %}</div>
+      </div>
+    </div>
+
+    <div class="mini-actions">
+      <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

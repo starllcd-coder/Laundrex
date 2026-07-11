@@ -1,0 +1,171 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Orders Kanban" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Orders Kanban" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+<div class="orders-head orders-head--with-actions">
+  <div>
+    <h1 class="h1">{% trans "Orders Kanban" %}</h1>
+    <p class="sub">{% trans "Drag-free flow with quick actions." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'orders:list' %}">{% trans "List" %}</a>
+    <a class="btn btn-outline" href="{% url 'orders:pickup' %}">{% trans "Pickup Counter" %}</a>
+    <a class="btn btn-primary" href="{% url 'pos:new_order' %}">{% trans "New Order" %}</a>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label>{% trans "Search" %}</label>
+    <input name="q" value="{{ q }}" placeholder="{% trans "Order #, phone, customer" %}" />
+  </div>
+
+  <div class="field">
+    <label>{% trans "Status" %}</label>
+    <select name="status">
+      <option value="">{% trans "All" %}</option>
+      {% for code,label in status_choices %}
+        <option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label>{% trans "Mode" %}</label>
+    <select name="mode">
+      <option value="" {% if not mode %}selected{% endif %}>{% trans "All" %}</option>
+      <option value="walkin" {% if mode == "walkin" %}selected{% endif %}>{% trans "Walk-in" %}</option>
+      <option value="delivery" {% if mode == "delivery" %}selected{% endif %}>{% trans "Delivery" %}</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>{% trans "Source" %}</label>
+    <select name="source">
+      <option value="" {% if not source %}selected{% endif %}>{% trans "All" %}</option>
+      <option value="mobile" {% if source == "mobile" %}selected{% endif %}>{% trans "Mobile App" %}</option>
+      <option value="frontdesk" {% if source == "frontdesk" %}selected{% endif %}>{% trans "Front Desk" %}</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat..." %}" />
+  </div>
+
+  <div class="field">
+    <label>{% trans "Date" %}</label>
+    <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" />
+  </div>
+
+  <div class="field">
+    <label>{% trans "Flags" %}</label>
+    <div class="check-row">
+      <label class="check-inline">
+        <input type="checkbox" name="unpaid" value="1" {% if unpaid %}checked{% endif %} />
+        {% trans "Unpaid" %}
+      </label>
+      <label class="check-inline">
+        <input type="checkbox" name="urgent" value="1" {% if urgent %}checked{% endif %} />
+        {% trans "Urgent" %}
+      </label>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="kanban">
+  {% for col in columns %}
+  <section class="kanban-col">
+    <div class="kanban-head">
+      <div class="kanban-title">{{ col.label }}</div>
+      <span class="pill {{ col.code|lower }}">{{ col.orders|length }}</span>
+    </div>
+
+    <div class="kanban-list">
+      {% for o in col.orders %}
+      <article class="kanban-card">
+        <div class="card-top">
+          <div>
+            <a class="link" href="{% url 'orders:detail' o.order_no %}">#{{ o.order_no }}</a>
+            {% if o.urgent %}<span class="badge-urgent">{% trans "Urgent" %}</span>{% endif %}
+            {% if o.is_delayed %}<span class="badge-delay">{% trans "Delayed" %}</span>{% endif %}
+          </div>
+          <span class="muted">{{ o.created_at|date:"M d, H:i" }}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="kv">
+            <div><span>{% trans "Customer" %}</span><b>{{ o.customer.name|default:walk_in_label }}</b></div>
+            <div><span>{% trans "Phone" %}</span><b>{{ o.customer.phone|default:"-" }}</b></div>
+            <div><span>{% trans "Source" %}</span><b>{% if o.mobile_meta %}{% trans "Mobile App" %}{% else %}{% trans "Front Desk" %}{% endif %}</b></div>
+            <div><span>{% trans "ETA" %}</span><b>{{ o.estimated_ready_at|date:"M d, H:i"|default:"-" }}</b></div>
+            <div><span>{% trans "Total" %}</span><b>{{ o.total }}</b></div>
+            <div><span>{% trans "Due" %}</span><b class="{% if o.balance > 0 %}neg{% endif %}">{{ o.balance }}</b></div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          {% if o.next_status != o.status %}
+          <form method="post" action="{% url 'orders:set_status' o.order_no %}">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="{{ o.next_status }}" />
+            <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+            <button class="btn-sm" type="submit">{% trans "Next" %}</button>
+          </form>
+          {% endif %}
+          <form method="post" action="{% url 'orders:set_urgent' o.order_no %}">
+            {% csrf_token %}
+            <input type="hidden" name="urgent" value="{% if o.urgent %}0{% else %}1{% endif %}" />
+            <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+            <button class="btn-sm" type="submit">{% if o.urgent %}{% trans "Clear Urgent" %}{% else %}{% trans "Mark Urgent" %}{% endif %}</button>
+          </form>
+          {% if o.status == "READY" %}
+          <form method="post" action="{% url 'orders:whatsapp_send' o.order_no %}">
+            {% csrf_token %}
+            <input type="hidden" name="template_key" value="ready_pickup" />
+            <input type="hidden" name="lang" value="en" />
+            <button class="btn-sm" type="submit">{% trans "WA Ready" %}</button>
+          </form>
+          {% endif %}
+          {% if o.balance > 0 %}
+          <form method="post" action="{% url 'orders:whatsapp_send' o.order_no %}">
+            {% csrf_token %}
+            <input type="hidden" name="template_key" value="payment_due" />
+            <input type="hidden" name="lang" value="en" />
+            <button class="btn-sm" type="submit">{% trans "WA Due" %}</button>
+          </form>
+          {% endif %}
+          {% if o.status == "DELIVERED" %}
+          <form method="post" action="{% url 'orders:whatsapp_send' o.order_no %}">
+            {% csrf_token %}
+            <input type="hidden" name="template_key" value="delivered" />
+            <input type="hidden" name="lang" value="en" />
+            <button class="btn-sm" type="submit">{% trans "WA Delivered" %}</button>
+          </form>
+          {% endif %}
+          <a class="btn-sm" target="_blank" href="{% url 'pos:receipt_80mm' %}?order={{ o.order_no }}">{% trans "Reprint" %}</a>
+          <a class="btn-sm" href="{% url 'orders:detail' o.order_no %}">{% trans "Open" %}</a>
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty">{% trans "No orders" %}</div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

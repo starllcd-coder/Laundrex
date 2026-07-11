@@ -1,0 +1,68 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Staff" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Staff" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="head">
+  <div>
+    <h1 class="h1">{% trans "Staff" %}</h1>
+    <p class="sub">{% trans "Assign branches and roles." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-primary" href="{% url 'management:staff_add' %}">{% trans "Add Staff" %}</a>
+    <a class="btn btn-outline" href="{% url 'management:home' %}">{% trans "Back" %}</a>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <div class="field">
+    <label>{% trans "Search" %}</label>
+    <input name="q" value="{{ q }}" placeholder="{% trans "Username or email" %}" />
+  </div>
+  <div class="field">
+    <label>{% trans "Branch" %}</label>
+    <input name="branch" value="{{ branch }}" placeholder="{% trans "muscat" %}" />
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-outline" type="submit">{% trans "Apply" %}</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "User" %}</th>
+          <th>{% trans "Email" %}</th>
+          <th>{% trans "Branch" %}</th>
+          <th>{% trans "Override" %}</th>
+          <th>{% trans "Groups" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><b>{{ u.username }}</b></td>
+          <td>{{ u.email|default:"-" }}</td>
+          <td>{{ u.profile.branch.code|default:"-" }}</td>
+          <td>{% if u.profile and u.profile.can_override_branch %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+          <td>{% for g in u.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+          <td class="right"><a class="btn-sm" href="{% url 'management:staff_detail' u.id %}">{% trans "Edit" %}</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="muted">{% trans "No staff found." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

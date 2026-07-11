@@ -1,0 +1,176 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Pickup Counter" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Pickup Counter" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% trans "Walk-in" as walk_in_label %}
+<div class="orders-head">
+  <div>
+    <h1 class="h1">{% trans "Pickup Counter" %}</h1>
+    <p class="sub">{% trans "Scan QR or type Order # to prepare or hand over orders." %}</p>
+  </div>
+</div>
+
+<form class="filters" method="post">
+  {% csrf_token %}
+  <div class="field grow">
+    <label>{% trans "Order No / QR" %}</label>
+    <input name="lookup_code" value="{{ code }}" placeholder="{% trans "LAUNDREX:1042 or 1042" %}" />
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button class="btn btn-primary" type="submit">{% trans "Lookup" %}</button>
+  </div>
+</form>
+
+{% if error %}<div class="banner error">{{ error }}</div>{% endif %}
+{% if info %}<div class="banner info">{{ info }}</div>{% endif %}
+
+{% if order %}
+<div class="pickup-grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% blocktrans with order_no=order.order_no %}Order #{{ order_no }}{% endblocktrans %}</h2>
+      <span class="pill {{ order.status|lower }}">{{ order.get_status_display }}</span>
+    </div>
+
+    <div class="kv">
+      <div><span>{% trans "Branch" %}</span><b>{{ order.branch }}</b></div>
+      <div><span>{% trans "Customer" %}</span><b>{{ order.customer.name|default:walk_in_label }}</b></div>
+      <div><span>{% trans "Phone" %}</span><b>{{ order.customer.phone|default:"-" }}</b></div>
+      <div><span>{% trans "Notes" %}</span><b>{{ order.notes|default:"-" }}</b></div>
+      <div><span>{% trans "Pickup Date" %}</span><b>{{ order.pickup_date|default:"-" }}</b></div>
+      <div><span>{% trans "Pickup Slot" %}</span><b>{{ order.pickup_slot|default:"-" }}</b></div>
+      <div><span>{% trans "Created" %}</span><b>{{ order.created_at }}</b></div>
+    </div>
+
+    <div class="pickup-actions">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="order_no" value="{{ order.order_no }}" />
+        <button class="btn btn-outline" name="action" value="mark_ready" type="submit">{% trans "Mark Ready" %}</button>
+        <button class="btn btn-primary" name="action" value="mark_delivered" type="submit">{% trans "Mark Delivered" %}</button>
+        <a class="btn btn-outline" target="_blank" href="{% url 'pos:receipt_80mm' %}?order={{ order.order_no }}">{% trans "Reprint" %}</a>
+      </form>
+      <form method="post" action="{% url 'orders:whatsapp_send' order.order_no %}">
+        {% csrf_token %}
+        <input type="hidden" name="lang" value="en" />
+        {% if order.status == "READY" %}
+          <button class="btn btn-outline" name="template_key" value="ready_pickup" type="submit">{% trans "WA Ready" %}</button>
+        {% endif %}
+        {% if order.balance > 0 %}
+          <button class="btn btn-outline" name="template_key" value="payment_due" type="submit">{% trans "WA Due" %}</button>
+        {% endif %}
+        {% if order.status == "DELIVERED" %}
+          <button class="btn btn-outline" name="template_key" value="delivered" type="submit">{% trans "WA Delivered" %}</button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Totals" %}</h2>
+      <span class="muted">{% trans "Updated" %}: {{ order.updated_at }}</span>
+    </div>
+    <div class="kv">
+      <div><span>{% trans "Subtotal" %}</span><b>{{ order.subtotal }}</b></div>
+      <div><span>{% trans "Discount" %}</span><b>{{ order.discount }}</b></div>
+      <div><span>{% trans "Tax" %}</span><b>{{ order.tax }}</b></div>
+      <div class="grand"><span>{% trans "Total" %}</span><b>{{ order.total }}</b></div>
+      <div><span>{% trans "Paid" %}</span><b>{{ order.paid }}</b></div>
+      <div><span>{% trans "Amount Due" %}</span><b class="{% if order.balance > 0 %}neg{% endif %}">{{ order.balance }}</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Items" %}</h2>
+    <span class="muted">{% blocktrans count count=order.items.count %}{{ count }} item{% plural %}{{ count }} items{% endblocktrans %}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Item" %}</th>
+          <th>{% trans "Service" %}</th>
+          <th class="right">{% trans "Qty" %}</th>
+          <th class="right">{% trans "Line Total" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in order.items.all %}
+        <tr>
+          <td><b>{{ it.item_name }}</b></td>
+          <td>{{ it.service_name }}</td>
+          <td class="right">{{ it.qty }}</td>
+          <td class="right"><b>{{ it.line_total }}</b></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="muted">{% trans "No items." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Collect Payment" %}</h2>
+    <span class="muted">{% trans "Only if there is remaining balance" %}</span>
+  </div>
+
+  <form method="post" class="pay-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="order_no" value="{{ order.order_no }}" />
+    <input type="hidden" name="action" value="collect_payment" />
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Amount (OMR)" %}</label>
+        <input name="amount" type="number" step="0.001" min="0" value="{{ order.balance }}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Method" %}</label>
+        <select name="method">
+          {% for code,label in method_choices %}
+            <option value="{{ code }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Reference" %}</label>
+        <input name="reference" type="text" placeholder="{% trans "Txn ID / bank ref" %}" />
+      </div>
+      <div class="field grow">
+        <label>{% trans "Note" %}</label>
+        <input name="note" type="text" placeholder="{% trans "Optional" %}" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field grow">
+        <label>{% trans "Bank Transfer Proof" %}</label>
+        <input name="proof" type="file" />
+      </div>
+    </div>
+
+    <div class="mini-actions">
+      <button class="btn btn-primary" type="submit">{% trans "Collect Payment" %}</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

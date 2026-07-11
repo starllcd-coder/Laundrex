@@ -1,0 +1,15 @@
+{% load static i18n %}
+<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Laundrex{% endblock %}</title>
+  <link rel="icon" href="{% static 'assets/favicon.ico' %}" type="image/x-icon" />
+  {% block head %}{% endblock %}
+</head>
+<body dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+  {% block content %}{% endblock %}
+</body>
+</html>

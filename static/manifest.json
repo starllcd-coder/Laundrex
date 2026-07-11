@@ -1,0 +1,15 @@
+{
+  "name": "Laundrex POS",
+  "short_name": "Laundrex",
+  "start_url": "/pos/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0B2A52",
+  "icons": [
+    {
+      "src": "/static/assets/laundrex-icon-64x64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}

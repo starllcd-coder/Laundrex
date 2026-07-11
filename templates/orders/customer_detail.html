@@ -1,0 +1,160 @@
+{% extends "base_app.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Customer" %} | Laundrex{% endblock %}
+{% block topbar_title %}{% trans "Customer" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="orders-head orders-head--with-actions">
+  <div>
+    <h1 class="h1">{% trans "Customer" %}</h1>
+    <p class="sub">{% trans "Profile, loyalty, and order history." %}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline" href="{% url 'orders:customers' %}">{% trans "Back" %}</a>
+    <a class="btn btn-outline" href="{% url 'pos:new_order' %}?customer_id={{ customer.id }}">{% trans "New Order" %}</a>
+    <a class="btn btn-primary" href="{% url 'pos:new_order' %}?customer_id={{ customer.id }}&repeat_last=1">{% trans "Repeat Last Order" %}</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Profile" %}</h2>
+      {% if customer.vip %}<span class="badge-urgent">{% trans "VIP" %}</span>{% endif %}
+    </div>
+
+    <form method="post" class="pay-form">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Name" %}</label>
+          <input name="name" value="{{ customer.name }}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Phone" %}</label>
+          <input name="phone" value="{{ customer.phone }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "VIP" %}</label>
+          <select name="vip">
+            <option value="0" {% if not customer.vip %}selected{% endif %}>{% trans "No" %}</option>
+            <option value="1" {% if customer.vip %}selected{% endif %}>{% trans "Yes" %}</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label>{% trans "VIP Discount %" %}</label>
+          <input name="vip_discount_percent" type="number" step="0.01" min="0" value="{{ customer.vip_discount_percent }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Points" %}</label>
+          <input name="points" type="number" min="0" value="{{ customer.points }}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Notes" %}</label>
+          <input name="notes" value="{{ customer.notes }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Address Line 1" %}</label>
+          <input name="address" value="{{ customer.address }}" />
+        </div>
+        <div class="field grow">
+          <label>{% trans "Address Line 2" %}</label>
+          <input name="address2" value="{{ customer.address2 }}" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "Preferred Language" %}</label>
+          <select name="preferred_language">
+            <option value="en" {% if customer.preferred_language == "en" %}selected{% endif %}>{% trans "English" %}</option>
+            <option value="ar" {% if customer.preferred_language == "ar" %}selected{% endif %}>{% trans "Arabic" %}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label>{% trans "WhatsApp Opt-in" %}</label>
+          <select name="whatsapp_opt_in">
+            <option value="0" {% if not customer.whatsapp_opt_in %}selected{% endif %}>{% trans "No" %}</option>
+            <option value="1" {% if customer.whatsapp_opt_in %}selected{% endif %}>{% trans "Yes" %}</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label>{% trans "WhatsApp Number" %}</label>
+          <input name="whatsapp_number" value="{{ customer.whatsapp_number|default:customer.phone }}" placeholder="+968..." />
+        </div>
+      </div>
+
+      <div class="mini-actions">
+        <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">{% trans "Loyalty" %}</h2>
+    </div>
+    <div class="kv">
+      <div><span>{% trans "Points" %}</span><b>{{ customer.points }}</b></div>
+      <div><span>{% trans "VIP" %}</span><b>{% if customer.vip %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</b></div>
+      <div><span>{% trans "VIP Discount" %}</span><b>{{ customer.vip_discount_percent }}%</b></div>
+      <div><span>{% trans "Notes" %}</span><b>{{ customer.notes|default:"-" }}</b></div>
+      <div><span>{% trans "Address" %}</span><b>{{ customer.address|default:"-" }}</b></div>
+      <div><span>{% trans "Address 2" %}</span><b>{{ customer.address2|default:"-" }}</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="card-head">
+    <h2 class="card-title">{% trans "Order History" %}</h2>
+    <span class="muted">{% trans "Latest 100" %}</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Order" %}</th>
+          <th>{% trans "Branch" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="right">{% trans "Total" %}</th>
+          <th class="right">{% trans "Paid" %}</th>
+          <th class="right">{% trans "Due" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><a class="link" href="{% url 'orders:detail' o.order_no %}">#{{ o.order_no }}</a><div class="muted">{{ o.created_at }}</div></td>
+          <td>{{ o.branch }}</td>
+          <td><span class="pill {{ o.status|lower }}">{{ o.get_status_display }}</span></td>
+          <td class="right"><b>{{ o.total }}</b></td>
+          <td class="right">{{ o.paid }}</td>
+          <td class="right"><b class="{% if o.balance > 0 %}neg{% endif %}">{{ o.balance }}</b></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="muted">{% trans "No orders yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
